@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-04 #2 18:05 第二輪：圖示/manifest拆檔、日出日落改本地計算、逐時曲線修正、文字精簡 -->
+<!-- 版本：2026-11-04 #3 18:40 回頂端按鈕、地震徽章等寬 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -338,6 +338,11 @@
       <span class="text-[10px] font-medium">即時地圖</span>
     </button>
   </div>
+
+  <!-- 回到頁首：捲動超過一屏才顯示；手機版避開底部導覽列 -->
+  <button type="button" id="btn-top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" aria-label="回到頁首" title="回到頁首" class="fixed right-4 z-40 w-10 h-10 rounded-full bg-muji-cardLight/95 dark:bg-muji-cardDark/95 border border-muji-borderLight dark:border-muji-borderDark shadow-md flex items-center justify-center text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-opacity duration-300 opacity-0 pointer-events-none lg:bottom-6" style="bottom:calc(4.75rem + env(safe-area-inset-bottom))">
+    <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+  </button>
 
   <!-- 地點設定跳出視窗 Modal -->
 <div id="location-modal" role="dialog" aria-modal="true" aria-labelledby="location-modal-title" inert class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" onclick="if(event.target===this) toggleLocationModal(false)">
@@ -1523,8 +1528,8 @@ function renderEarthquakeList() {
   document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map((eq, i) => {
     const mi = maxIntensity_(eq.areas);
     return `<button type="button" onclick="openEarthquakeDetail(${i})" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
-      <span class="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
-      <span class="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold ${intensityBadgeCls_(mi)}">${escapeHtml_(mi)}</span>
+      <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-[10px] font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[10px] font-bold ${intensityBadgeCls_(mi)}">${escapeHtml_(mi)}</span>
       <span class="flex-1 min-w-0 truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
       <span class="text-muji-textMutedLight dark:text-muji-textMutedDark shrink-0 text-right leading-tight">
         <span class="block">${escapeHtml_(relativeTime_(eq.originTime))}</span>
@@ -1553,7 +1558,7 @@ function openEarthquakeDetail(i) {
   const groupLines = groupByIntensity_(eq.areas).map(g => {
     const counties = g.counties.map(c => c === currentCounty ? `<strong class="text-muji-accentLight dark:text-muji-accentDark">📍${escapeHtml_(c)}</strong>` : escapeHtml_(c));
     return `<div class="flex items-start gap-2">
-      <span class="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[10px] font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
       <span class="flex-1">${counties.join('、')}</span>
     </div>`;
   }).join('');
@@ -1590,6 +1595,11 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
       }
 
       lastScrollY = currentScrollY;
+
+      const topBtn = document.getElementById('btn-top');
+      const showTop = currentScrollY > window.innerHeight * 0.8;
+      topBtn.classList.toggle('opacity-0', !showTop);
+      topBtn.classList.toggle('pointer-events-none', !showTop);
     });
 
     // 5. 主題邏輯
