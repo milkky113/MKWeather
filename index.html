@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-04 #3 18:40 回頂端按鈕、地震徽章等寬 -->
+<!-- 版本：2026-11-04 #4 19:50 逐時預報改單一長條、農曆節氣改自動計算 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -197,7 +197,7 @@
 
         </div>
 
-        <!-- 逐時預報 (每一小時，可切換日期分頁) -->
+        <!-- 逐時預報 (每一小時連成一條，日期按鈕＝跳到該日零時) -->
         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-6 shadow-sm min-w-0">
           <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
             <h3 class="text-sm font-bold tracking-wide flex items-center gap-2">
@@ -208,7 +208,11 @@
                 <div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>
                 <div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>
               </div>
-              <i class="fa-solid fa-arrows-left-right text-xs shrink-0 text-muji-textMutedLight dark:text-muji-textMutedDark" role="img" aria-label="可左右滑動" title="可左右滑動"></i>
+              <i class="fa-solid fa-arrows-left-right text-xs shrink-0 md:hidden text-muji-textMutedLight dark:text-muji-textMutedDark" role="img" aria-label="可左右滑動" title="可左右滑動"></i>
+              <div class="hidden md:flex items-center gap-1 shrink-0">
+                <button type="button" id="hour-prev" onclick="scrollHourBy_(-1)" aria-label="向左" title="向左" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark disabled:opacity-30 disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-left text-xs" aria-hidden="true"></i></button>
+                <button type="button" id="hour-next" onclick="scrollHourBy_(1)" aria-label="向右" title="向右" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark disabled:opacity-30 disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i></button>
+              </div>
             </div>
           </div>
 
@@ -406,9 +410,6 @@
 </div>
 
   <script>
-    const LUNAR_2026 = {"2026-01-01":{"ganzhi":"乙巳","month":"11","day":"13","week":"4"},"2026-01-02":{"ganzhi":"乙巳","month":"11","day":"14","week":"5"},"2026-01-03":{"ganzhi":"乙巳","month":"11","day":"15","week":"6"},"2026-01-04":{"ganzhi":"乙巳","month":"11","day":"16","week":"7"},"2026-01-05":{"ganzhi":"乙巳","month":"11","day":"17","week":"1"},"2026-01-06":{"ganzhi":"乙巳","month":"11","day":"18","week":"2"},"2026-01-07":{"ganzhi":"乙巳","month":"11","day":"19","week":"3"},"2026-01-08":{"ganzhi":"乙巳","month":"11","day":"20","week":"4"},"2026-01-09":{"ganzhi":"乙巳","month":"11","day":"21","week":"5"},"2026-01-10":{"ganzhi":"乙巳","month":"11","day":"22","week":"6"},"2026-01-11":{"ganzhi":"乙巳","month":"11","day":"23","week":"7"},"2026-01-12":{"ganzhi":"乙巳","month":"11","day":"24","week":"1"},"2026-01-13":{"ganzhi":"乙巳","month":"11","day":"25","week":"2"},"2026-01-14":{"ganzhi":"乙巳","month":"11","day":"26","week":"3"},"2026-01-15":{"ganzhi":"乙巳","month":"11","day":"27","week":"4"},"2026-01-16":{"ganzhi":"乙巳","month":"11","day":"28","week":"5"},"2026-01-17":{"ganzhi":"乙巳","month":"11","day":"29","week":"6"},"2026-01-18":{"ganzhi":"乙巳","month":"11","day":"30","week":"7"},"2026-01-19":{"ganzhi":"乙巳","month":"12","day":"1","week":"1"},"2026-01-20":{"ganzhi":"乙巳","month":"12","day":"2","week":"2"},"2026-01-21":{"ganzhi":"乙巳","month":"12","day":"3","week":"3"},"2026-01-22":{"ganzhi":"乙巳","month":"12","day":"4","week":"4"},"2026-01-23":{"ganzhi":"乙巳","month":"12","day":"5","week":"5"},"2026-01-24":{"ganzhi":"乙巳","month":"12","day":"6","week":"6"},"2026-01-25":{"ganzhi":"乙巳","month":"12","day":"7","week":"7"},"2026-01-26":{"ganzhi":"乙巳","month":"12","day":"8","week":"1"},"2026-01-27":{"ganzhi":"乙巳","month":"12","day":"9","week":"2"},"2026-01-28":{"ganzhi":"乙巳","month":"12","day":"10","week":"3"},"2026-01-29":{"ganzhi":"乙巳","month":"12","day":"11","week":"4"},"2026-01-30":{"ganzhi":"乙巳","month":"12","day":"12","week":"5"},"2026-01-31":{"ganzhi":"乙巳","month":"12","day":"13","week":"6"},"2026-02-01":{"ganzhi":"乙巳","month":"12","day":"14","week":"7"},"2026-02-02":{"ganzhi":"乙巳","month":"12","day":"15","week":"1"},"2026-02-03":{"ganzhi":"乙巳","month":"12","day":"16","week":"2"},"2026-02-04":{"ganzhi":"乙巳","month":"12","day":"17","week":"3"},"2026-02-05":{"ganzhi":"乙巳","month":"12","day":"18","week":"4"},"2026-02-06":{"ganzhi":"乙巳","month":"12","day":"19","week":"5"},"2026-02-07":{"ganzhi":"乙巳","month":"12","day":"20","week":"6"},"2026-02-08":{"ganzhi":"乙巳","month":"12","day":"21","week":"7"},"2026-02-09":{"ganzhi":"乙巳","month":"12","day":"22","week":"1"},"2026-02-10":{"ganzhi":"乙巳","month":"12","day":"23","week":"2"},"2026-02-11":{"ganzhi":"乙巳","month":"12","day":"24","week":"3"},"2026-02-12":{"ganzhi":"乙巳","month":"12","day":"25","week":"4"},"2026-02-13":{"ganzhi":"乙巳","month":"12","day":"26","week":"5"},"2026-02-14":{"ganzhi":"乙巳","month":"12","day":"27","week":"6"},"2026-02-15":{"ganzhi":"乙巳","month":"12","day":"28","week":"7"},"2026-02-16":{"ganzhi":"乙巳","month":"12","day":"29","week":"1"},"2026-02-17":{"ganzhi":"丙午","month":"1","day":"1","week":"2"},"2026-02-18":{"ganzhi":"丙午","month":"1","day":"2","week":"3"},"2026-02-19":{"ganzhi":"丙午","month":"1","day":"3","week":"4"},"2026-02-20":{"ganzhi":"丙午","month":"1","day":"4","week":"5"},"2026-02-21":{"ganzhi":"丙午","month":"1","day":"5","week":"6"},"2026-02-22":{"ganzhi":"丙午","month":"1","day":"6","week":"7"},"2026-02-23":{"ganzhi":"丙午","month":"1","day":"7","week":"1"},"2026-02-24":{"ganzhi":"丙午","month":"1","day":"8","week":"2"},"2026-02-25":{"ganzhi":"丙午","month":"1","day":"9","week":"3"},"2026-02-26":{"ganzhi":"丙午","month":"1","day":"10","week":"4"},"2026-02-27":{"ganzhi":"丙午","month":"1","day":"11","week":"5"},"2026-02-28":{"ganzhi":"丙午","month":"1","day":"12","week":"6"},"2026-03-01":{"ganzhi":"丙午","month":"1","day":"13","week":"7"},"2026-03-02":{"ganzhi":"丙午","month":"1","day":"14","week":"1"},"2026-03-03":{"ganzhi":"丙午","month":"1","day":"15","week":"2"},"2026-03-04":{"ganzhi":"丙午","month":"1","day":"16","week":"3"},"2026-03-05":{"ganzhi":"丙午","month":"1","day":"17","week":"4"},"2026-03-06":{"ganzhi":"丙午","month":"1","day":"18","week":"5"},"2026-03-07":{"ganzhi":"丙午","month":"1","day":"19","week":"6"},"2026-03-08":{"ganzhi":"丙午","month":"1","day":"20","week":"7"},"2026-03-09":{"ganzhi":"丙午","month":"1","day":"21","week":"1"},"2026-03-10":{"ganzhi":"丙午","month":"1","day":"22","week":"2"},"2026-03-11":{"ganzhi":"丙午","month":"1","day":"23","week":"3"},"2026-03-12":{"ganzhi":"丙午","month":"1","day":"24","week":"4"},"2026-03-13":{"ganzhi":"丙午","month":"1","day":"25","week":"5"},"2026-03-14":{"ganzhi":"丙午","month":"1","day":"26","week":"6"},"2026-03-15":{"ganzhi":"丙午","month":"1","day":"27","week":"7"},"2026-03-16":{"ganzhi":"丙午","month":"1","day":"28","week":"1"},"2026-03-17":{"ganzhi":"丙午","month":"1","day":"29","week":"2"},"2026-03-18":{"ganzhi":"丙午","month":"1","day":"30","week":"3"},"2026-03-19":{"ganzhi":"丙午","month":"2","day":"1","week":"4"},"2026-03-20":{"ganzhi":"丙午","month":"2","day":"2","week":"5"},"2026-03-21":{"ganzhi":"丙午","month":"2","day":"3","week":"6"},"2026-03-22":{"ganzhi":"丙午","month":"2","day":"4","week":"7"},"2026-03-23":{"ganzhi":"丙午","month":"2","day":"5","week":"1"},"2026-03-24":{"ganzhi":"丙午","month":"2","day":"6","week":"2"},"2026-03-25":{"ganzhi":"丙午","month":"2","day":"7","week":"3"},"2026-03-26":{"ganzhi":"丙午","month":"2","day":"8","week":"4"},"2026-03-27":{"ganzhi":"丙午","month":"2","day":"9","week":"5"},"2026-03-28":{"ganzhi":"丙午","month":"2","day":"10","week":"6"},"2026-03-29":{"ganzhi":"丙午","month":"2","day":"11","week":"7"},"2026-03-30":{"ganzhi":"丙午","month":"2","day":"12","week":"1"},"2026-03-31":{"ganzhi":"丙午","month":"2","day":"13","week":"2"},"2026-04-01":{"ganzhi":"丙午","month":"2","day":"14","week":"3"},"2026-04-02":{"ganzhi":"丙午","month":"2","day":"15","week":"4"},"2026-04-03":{"ganzhi":"丙午","month":"2","day":"16","week":"5"},"2026-04-04":{"ganzhi":"丙午","month":"2","day":"17","week":"6"},"2026-04-05":{"ganzhi":"丙午","month":"2","day":"18","week":"7"},"2026-04-06":{"ganzhi":"丙午","month":"2","day":"19","week":"1"},"2026-04-07":{"ganzhi":"丙午","month":"2","day":"20","week":"2"},"2026-04-08":{"ganzhi":"丙午","month":"2","day":"21","week":"3"},"2026-04-09":{"ganzhi":"丙午","month":"2","day":"22","week":"4"},"2026-04-10":{"ganzhi":"丙午","month":"2","day":"23","week":"5"},"2026-04-11":{"ganzhi":"丙午","month":"2","day":"24","week":"6"},"2026-04-12":{"ganzhi":"丙午","month":"2","day":"25","week":"7"},"2026-04-13":{"ganzhi":"丙午","month":"2","day":"26","week":"1"},"2026-04-14":{"ganzhi":"丙午","month":"2","day":"27","week":"2"},"2026-04-15":{"ganzhi":"丙午","month":"2","day":"28","week":"3"},"2026-04-16":{"ganzhi":"丙午","month":"2","day":"29","week":"4"},"2026-04-17":{"ganzhi":"丙午","month":"3","day":"1","week":"5"},"2026-04-18":{"ganzhi":"丙午","month":"3","day":"2","week":"6"},"2026-04-19":{"ganzhi":"丙午","month":"3","day":"3","week":"7"},"2026-04-20":{"ganzhi":"丙午","month":"3","day":"4","week":"1"},"2026-04-21":{"ganzhi":"丙午","month":"3","day":"5","week":"2"},"2026-04-22":{"ganzhi":"丙午","month":"3","day":"6","week":"3"},"2026-04-23":{"ganzhi":"丙午","month":"3","day":"7","week":"4"},"2026-04-24":{"ganzhi":"丙午","month":"3","day":"8","week":"5"},"2026-04-25":{"ganzhi":"丙午","month":"3","day":"9","week":"6"},"2026-04-26":{"ganzhi":"丙午","month":"3","day":"10","week":"7"},"2026-04-27":{"ganzhi":"丙午","month":"3","day":"11","week":"1"},"2026-04-28":{"ganzhi":"丙午","month":"3","day":"12","week":"2"},"2026-04-29":{"ganzhi":"丙午","month":"3","day":"13","week":"3"},"2026-04-30":{"ganzhi":"丙午","month":"3","day":"14","week":"4"},"2026-05-01":{"ganzhi":"丙午","month":"3","day":"15","week":"5"},"2026-05-02":{"ganzhi":"丙午","month":"3","day":"16","week":"6"},"2026-05-03":{"ganzhi":"丙午","month":"3","day":"17","week":"7"},"2026-05-04":{"ganzhi":"丙午","month":"3","day":"18","week":"1"},"2026-05-05":{"ganzhi":"丙午","month":"3","day":"19","week":"2"},"2026-05-06":{"ganzhi":"丙午","month":"3","day":"20","week":"3"},"2026-05-07":{"ganzhi":"丙午","month":"3","day":"21","week":"4"},"2026-05-08":{"ganzhi":"丙午","month":"3","day":"22","week":"5"},"2026-05-09":{"ganzhi":"丙午","month":"3","day":"23","week":"6"},"2026-05-10":{"ganzhi":"丙午","month":"3","day":"24","week":"7"},"2026-05-11":{"ganzhi":"丙午","month":"3","day":"25","week":"1"},"2026-05-12":{"ganzhi":"丙午","month":"3","day":"26","week":"2"},"2026-05-13":{"ganzhi":"丙午","month":"3","day":"27","week":"3"},"2026-05-14":{"ganzhi":"丙午","month":"3","day":"28","week":"4"},"2026-05-15":{"ganzhi":"丙午","month":"3","day":"29","week":"5"},"2026-05-16":{"ganzhi":"丙午","month":"3","day":"30","week":"6"},"2026-05-17":{"ganzhi":"丙午","month":"4","day":"1","week":"7"},"2026-05-18":{"ganzhi":"丙午","month":"4","day":"2","week":"1"},"2026-05-19":{"ganzhi":"丙午","month":"4","day":"3","week":"2"},"2026-05-20":{"ganzhi":"丙午","month":"4","day":"4","week":"3"},"2026-05-21":{"ganzhi":"丙午","month":"4","day":"5","week":"4"},"2026-05-22":{"ganzhi":"丙午","month":"4","day":"6","week":"5"},"2026-05-23":{"ganzhi":"丙午","month":"4","day":"7","week":"6"},"2026-05-24":{"ganzhi":"丙午","month":"4","day":"8","week":"7"},"2026-05-25":{"ganzhi":"丙午","month":"4","day":"9","week":"1"},"2026-05-26":{"ganzhi":"丙午","month":"4","day":"10","week":"2"},"2026-05-27":{"ganzhi":"丙午","month":"4","day":"11","week":"3"},"2026-05-28":{"ganzhi":"丙午","month":"4","day":"12","week":"4"},"2026-05-29":{"ganzhi":"丙午","month":"4","day":"13","week":"5"},"2026-05-30":{"ganzhi":"丙午","month":"4","day":"14","week":"6"},"2026-05-31":{"ganzhi":"丙午","month":"4","day":"15","week":"7"},"2026-06-01":{"ganzhi":"丙午","month":"4","day":"16","week":"1"},"2026-06-02":{"ganzhi":"丙午","month":"4","day":"17","week":"2"},"2026-06-03":{"ganzhi":"丙午","month":"4","day":"18","week":"3"},"2026-06-04":{"ganzhi":"丙午","month":"4","day":"19","week":"4"},"2026-06-05":{"ganzhi":"丙午","month":"4","day":"20","week":"5"},"2026-06-06":{"ganzhi":"丙午","month":"4","day":"21","week":"6"},"2026-06-07":{"ganzhi":"丙午","month":"4","day":"22","week":"7"},"2026-06-08":{"ganzhi":"丙午","month":"4","day":"23","week":"1"},"2026-06-09":{"ganzhi":"丙午","month":"4","day":"24","week":"2"},"2026-06-10":{"ganzhi":"丙午","month":"4","day":"25","week":"3"},"2026-06-11":{"ganzhi":"丙午","month":"4","day":"26","week":"4"},"2026-06-12":{"ganzhi":"丙午","month":"4","day":"27","week":"5"},"2026-06-13":{"ganzhi":"丙午","month":"4","day":"28","week":"6"},"2026-06-14":{"ganzhi":"丙午","month":"4","day":"29","week":"7"},"2026-06-15":{"ganzhi":"丙午","month":"5","day":"1","week":"1"},"2026-06-16":{"ganzhi":"丙午","month":"5","day":"2","week":"2"},"2026-06-17":{"ganzhi":"丙午","month":"5","day":"3","week":"3"},"2026-06-18":{"ganzhi":"丙午","month":"5","day":"4","week":"4"},"2026-06-19":{"ganzhi":"丙午","month":"5","day":"5","week":"5"},"2026-06-20":{"ganzhi":"丙午","month":"5","day":"6","week":"6"},"2026-06-21":{"ganzhi":"丙午","month":"5","day":"7","week":"7"},"2026-06-22":{"ganzhi":"丙午","month":"5","day":"8","week":"1"},"2026-06-23":{"ganzhi":"丙午","month":"5","day":"9","week":"2"},"2026-06-24":{"ganzhi":"丙午","month":"5","day":"10","week":"3"},"2026-06-25":{"ganzhi":"丙午","month":"5","day":"11","week":"4"},"2026-06-26":{"ganzhi":"丙午","month":"5","day":"12","week":"5"},"2026-06-27":{"ganzhi":"丙午","month":"5","day":"13","week":"6"},"2026-06-28":{"ganzhi":"丙午","month":"5","day":"14","week":"7"},"2026-06-29":{"ganzhi":"丙午","month":"5","day":"15","week":"1"},"2026-06-30":{"ganzhi":"丙午","month":"5","day":"16","week":"2"},"2026-07-01":{"ganzhi":"丙午","month":"5","day":"17","week":"3"},"2026-07-02":{"ganzhi":"丙午","month":"5","day":"18","week":"4"},"2026-07-03":{"ganzhi":"丙午","month":"5","day":"19","week":"5"},"2026-07-04":{"ganzhi":"丙午","month":"5","day":"20","week":"6"},"2026-07-05":{"ganzhi":"丙午","month":"5","day":"21","week":"7"},"2026-07-06":{"ganzhi":"丙午","month":"5","day":"22","week":"1"},"2026-07-07":{"ganzhi":"丙午","month":"5","day":"23","week":"2"},"2026-07-08":{"ganzhi":"丙午","month":"5","day":"24","week":"3"},"2026-07-09":{"ganzhi":"丙午","month":"5","day":"25","week":"4"},"2026-07-10":{"ganzhi":"丙午","month":"5","day":"26","week":"5"},"2026-07-11":{"ganzhi":"丙午","month":"5","day":"27","week":"6"},"2026-07-12":{"ganzhi":"丙午","month":"5","day":"28","week":"7"},"2026-07-13":{"ganzhi":"丙午","month":"5","day":"29","week":"1"},"2026-07-14":{"ganzhi":"丙午","month":"6","day":"1","week":"2"},"2026-07-15":{"ganzhi":"丙午","month":"6","day":"2","week":"3"},"2026-07-16":{"ganzhi":"丙午","month":"6","day":"3","week":"4"},"2026-07-17":{"ganzhi":"丙午","month":"6","day":"4","week":"5"},"2026-07-18":{"ganzhi":"丙午","month":"6","day":"5","week":"6"},"2026-07-19":{"ganzhi":"丙午","month":"6","day":"6","week":"7"},"2026-07-20":{"ganzhi":"丙午","month":"6","day":"7","week":"1"},"2026-07-21":{"ganzhi":"丙午","month":"6","day":"8","week":"2"},"2026-07-22":{"ganzhi":"丙午","month":"6","day":"9","week":"3"},"2026-07-23":{"ganzhi":"丙午","month":"6","day":"10","week":"4"},"2026-07-24":{"ganzhi":"丙午","month":"6","day":"11","week":"5"},"2026-07-25":{"ganzhi":"丙午","month":"6","day":"12","week":"6"},"2026-07-26":{"ganzhi":"丙午","month":"6","day":"13","week":"7"},"2026-07-27":{"ganzhi":"丙午","month":"6","day":"14","week":"1"},"2026-07-28":{"ganzhi":"丙午","month":"6","day":"15","week":"2"},"2026-07-29":{"ganzhi":"丙午","month":"6","day":"16","week":"3"},"2026-07-30":{"ganzhi":"丙午","month":"6","day":"17","week":"4"},"2026-07-31":{"ganzhi":"丙午","month":"6","day":"18","week":"5"},"2026-08-01":{"ganzhi":"丙午","month":"6","day":"19","week":"6"},"2026-08-02":{"ganzhi":"丙午","month":"6","day":"20","week":"7"},"2026-08-03":{"ganzhi":"丙午","month":"6","day":"21","week":"1"},"2026-08-04":{"ganzhi":"丙午","month":"6","day":"22","week":"2"},"2026-08-05":{"ganzhi":"丙午","month":"6","day":"23","week":"3"},"2026-08-06":{"ganzhi":"丙午","month":"6","day":"24","week":"4"},"2026-08-07":{"ganzhi":"丙午","month":"6","day":"25","week":"5"},"2026-08-08":{"ganzhi":"丙午","month":"6","day":"26","week":"6"},"2026-08-09":{"ganzhi":"丙午","month":"6","day":"27","week":"7"},"2026-08-10":{"ganzhi":"丙午","month":"6","day":"28","week":"1"},"2026-08-11":{"ganzhi":"丙午","month":"6","day":"29","week":"2"},"2026-08-12":{"ganzhi":"丙午","month":"6","day":"30","week":"3"},"2026-08-13":{"ganzhi":"丙午","month":"7","day":"1","week":"4"},"2026-08-14":{"ganzhi":"丙午","month":"7","day":"2","week":"5"},"2026-08-15":{"ganzhi":"丙午","month":"7","day":"3","week":"6"},"2026-08-16":{"ganzhi":"丙午","month":"7","day":"4","week":"7"},"2026-08-17":{"ganzhi":"丙午","month":"7","day":"5","week":"1"},"2026-08-18":{"ganzhi":"丙午","month":"7","day":"6","week":"2"},"2026-08-19":{"ganzhi":"丙午","month":"7","day":"7","week":"3"},"2026-08-20":{"ganzhi":"丙午","month":"7","day":"8","week":"4"},"2026-08-21":{"ganzhi":"丙午","month":"7","day":"9","week":"5"},"2026-08-22":{"ganzhi":"丙午","month":"7","day":"10","week":"6"},"2026-08-23":{"ganzhi":"丙午","month":"7","day":"11","week":"7"},"2026-08-24":{"ganzhi":"丙午","month":"7","day":"12","week":"1"},"2026-08-25":{"ganzhi":"丙午","month":"7","day":"13","week":"2"},"2026-08-26":{"ganzhi":"丙午","month":"7","day":"14","week":"3"},"2026-08-27":{"ganzhi":"丙午","month":"7","day":"15","week":"4"},"2026-08-28":{"ganzhi":"丙午","month":"7","day":"16","week":"5"},"2026-08-29":{"ganzhi":"丙午","month":"7","day":"17","week":"6"},"2026-08-30":{"ganzhi":"丙午","month":"7","day":"18","week":"7"},"2026-08-31":{"ganzhi":"丙午","month":"7","day":"19","week":"1"},"2026-09-01":{"ganzhi":"丙午","month":"7","day":"20","week":"2"},"2026-09-02":{"ganzhi":"丙午","month":"7","day":"21","week":"3"},"2026-09-03":{"ganzhi":"丙午","month":"7","day":"22","week":"4"},"2026-09-04":{"ganzhi":"丙午","month":"7","day":"23","week":"5"},"2026-09-05":{"ganzhi":"丙午","month":"7","day":"24","week":"6"},"2026-09-06":{"ganzhi":"丙午","month":"7","day":"25","week":"7"},"2026-09-07":{"ganzhi":"丙午","month":"7","day":"26","week":"1"},"2026-09-08":{"ganzhi":"丙午","month":"7","day":"27","week":"2"},"2026-09-09":{"ganzhi":"丙午","month":"7","day":"28","week":"3"},"2026-09-10":{"ganzhi":"丙午","month":"7","day":"29","week":"4"},"2026-09-11":{"ganzhi":"丙午","month":"8","day":"1","week":"5"},"2026-09-12":{"ganzhi":"丙午","month":"8","day":"2","week":"6"},"2026-09-13":{"ganzhi":"丙午","month":"8","day":"3","week":"7"},"2026-09-14":{"ganzhi":"丙午","month":"8","day":"4","week":"1"},"2026-09-15":{"ganzhi":"丙午","month":"8","day":"5","week":"2"},"2026-09-16":{"ganzhi":"丙午","month":"8","day":"6","week":"3"},"2026-09-17":{"ganzhi":"丙午","month":"8","day":"7","week":"4"},"2026-09-18":{"ganzhi":"丙午","month":"8","day":"8","week":"5"},"2026-09-19":{"ganzhi":"丙午","month":"8","day":"9","week":"6"},"2026-09-20":{"ganzhi":"丙午","month":"8","day":"10","week":"7"},"2026-09-21":{"ganzhi":"丙午","month":"8","day":"11","week":"1"},"2026-09-22":{"ganzhi":"丙午","month":"8","day":"12","week":"2"},"2026-09-23":{"ganzhi":"丙午","month":"8","day":"13","week":"3"},"2026-09-24":{"ganzhi":"丙午","month":"8","day":"14","week":"4"},"2026-09-25":{"ganzhi":"丙午","month":"8","day":"15","week":"5"},"2026-09-26":{"ganzhi":"丙午","month":"8","day":"16","week":"6"},"2026-09-27":{"ganzhi":"丙午","month":"8","day":"17","week":"7"},"2026-09-28":{"ganzhi":"丙午","month":"8","day":"18","week":"1"},"2026-09-29":{"ganzhi":"丙午","month":"8","day":"19","week":"2"},"2026-09-30":{"ganzhi":"丙午","month":"8","day":"20","week":"3"},"2026-10-01":{"ganzhi":"丙午","month":"8","day":"21","week":"4"},"2026-10-02":{"ganzhi":"丙午","month":"8","day":"22","week":"5"},"2026-10-03":{"ganzhi":"丙午","month":"8","day":"23","week":"6"},"2026-10-04":{"ganzhi":"丙午","month":"8","day":"24","week":"7"},"2026-10-05":{"ganzhi":"丙午","month":"8","day":"25","week":"1"},"2026-10-06":{"ganzhi":"丙午","month":"8","day":"26","week":"2"},"2026-10-07":{"ganzhi":"丙午","month":"8","day":"27","week":"3"},"2026-10-08":{"ganzhi":"丙午","month":"8","day":"28","week":"4"},"2026-10-09":{"ganzhi":"丙午","month":"8","day":"29","week":"5"},"2026-10-10":{"ganzhi":"丙午","month":"9","day":"1","week":"6"},"2026-10-11":{"ganzhi":"丙午","month":"9","day":"2","week":"7"},"2026-10-12":{"ganzhi":"丙午","month":"9","day":"3","week":"1"},"2026-10-13":{"ganzhi":"丙午","month":"9","day":"4","week":"2"},"2026-10-14":{"ganzhi":"丙午","month":"9","day":"5","week":"3"},"2026-10-15":{"ganzhi":"丙午","month":"9","day":"6","week":"4"},"2026-10-16":{"ganzhi":"丙午","month":"9","day":"7","week":"5"},"2026-10-17":{"ganzhi":"丙午","month":"9","day":"8","week":"6"},"2026-10-18":{"ganzhi":"丙午","month":"9","day":"9","week":"7"},"2026-10-19":{"ganzhi":"丙午","month":"9","day":"10","week":"1"},"2026-10-20":{"ganzhi":"丙午","month":"9","day":"11","week":"2"},"2026-10-21":{"ganzhi":"丙午","month":"9","day":"12","week":"3"},"2026-10-22":{"ganzhi":"丙午","month":"9","day":"13","week":"4"},"2026-10-23":{"ganzhi":"丙午","month":"9","day":"14","week":"5"},"2026-10-24":{"ganzhi":"丙午","month":"9","day":"15","week":"6"},"2026-10-25":{"ganzhi":"丙午","month":"9","day":"16","week":"7"},"2026-10-26":{"ganzhi":"丙午","month":"9","day":"17","week":"1"},"2026-10-27":{"ganzhi":"丙午","month":"9","day":"18","week":"2"},"2026-10-28":{"ganzhi":"丙午","month":"9","day":"19","week":"3"},"2026-10-29":{"ganzhi":"丙午","month":"9","day":"20","week":"4"},"2026-10-30":{"ganzhi":"丙午","month":"9","day":"21","week":"5"},"2026-10-31":{"ganzhi":"丙午","month":"9","day":"22","week":"6"},"2026-11-01":{"ganzhi":"丙午","month":"9","day":"23","week":"7"},"2026-11-02":{"ganzhi":"丙午","month":"9","day":"24","week":"1"},"2026-11-03":{"ganzhi":"丙午","month":"9","day":"25","week":"2"},"2026-11-04":{"ganzhi":"丙午","month":"9","day":"26","week":"3"},"2026-11-05":{"ganzhi":"丙午","month":"9","day":"27","week":"4"},"2026-11-06":{"ganzhi":"丙午","month":"9","day":"28","week":"5"},"2026-11-07":{"ganzhi":"丙午","month":"9","day":"29","week":"6"},"2026-11-08":{"ganzhi":"丙午","month":"9","day":"30","week":"7"},"2026-11-09":{"ganzhi":"丙午","month":"10","day":"1","week":"1"},"2026-11-10":{"ganzhi":"丙午","month":"10","day":"2","week":"2"},"2026-11-11":{"ganzhi":"丙午","month":"10","day":"3","week":"3"},"2026-11-12":{"ganzhi":"丙午","month":"10","day":"4","week":"4"},"2026-11-13":{"ganzhi":"丙午","month":"10","day":"5","week":"5"},"2026-11-14":{"ganzhi":"丙午","month":"10","day":"6","week":"6"},"2026-11-15":{"ganzhi":"丙午","month":"10","day":"7","week":"7"},"2026-11-16":{"ganzhi":"丙午","month":"10","day":"8","week":"1"},"2026-11-17":{"ganzhi":"丙午","month":"10","day":"9","week":"2"},"2026-11-18":{"ganzhi":"丙午","month":"10","day":"10","week":"3"},"2026-11-19":{"ganzhi":"丙午","month":"10","day":"11","week":"4"},"2026-11-20":{"ganzhi":"丙午","month":"10","day":"12","week":"5"},"2026-11-21":{"ganzhi":"丙午","month":"10","day":"13","week":"6"},"2026-11-22":{"ganzhi":"丙午","month":"10","day":"14","week":"7"},"2026-11-23":{"ganzhi":"丙午","month":"10","day":"15","week":"1"},"2026-11-24":{"ganzhi":"丙午","month":"10","day":"16","week":"2"},"2026-11-25":{"ganzhi":"丙午","month":"10","day":"17","week":"3"},"2026-11-26":{"ganzhi":"丙午","month":"10","day":"18","week":"4"},"2026-11-27":{"ganzhi":"丙午","month":"10","day":"19","week":"5"},"2026-11-28":{"ganzhi":"丙午","month":"10","day":"20","week":"6"},"2026-11-29":{"ganzhi":"丙午","month":"10","day":"21","week":"7"},"2026-11-30":{"ganzhi":"丙午","month":"10","day":"22","week":"1"},"2026-12-01":{"ganzhi":"丙午","month":"10","day":"23","week":"2"},"2026-12-02":{"ganzhi":"丙午","month":"10","day":"24","week":"3"},"2026-12-03":{"ganzhi":"丙午","month":"10","day":"25","week":"4"},"2026-12-04":{"ganzhi":"丙午","month":"10","day":"26","week":"5"},"2026-12-05":{"ganzhi":"丙午","month":"10","day":"27","week":"6"},"2026-12-06":{"ganzhi":"丙午","month":"10","day":"28","week":"7"},"2026-12-07":{"ganzhi":"丙午","month":"10","day":"29","week":"1"},"2026-12-08":{"ganzhi":"丙午","month":"10","day":"30","week":"2"},"2026-12-09":{"ganzhi":"丙午","month":"11","day":"1","week":"3"},"2026-12-10":{"ganzhi":"丙午","month":"11","day":"2","week":"4"},"2026-12-11":{"ganzhi":"丙午","month":"11","day":"3","week":"5"},"2026-12-12":{"ganzhi":"丙午","month":"11","day":"4","week":"6"},"2026-12-13":{"ganzhi":"丙午","month":"11","day":"5","week":"7"},"2026-12-14":{"ganzhi":"丙午","month":"11","day":"6","week":"1"},"2026-12-15":{"ganzhi":"丙午","month":"11","day":"7","week":"2"},"2026-12-16":{"ganzhi":"丙午","month":"11","day":"8","week":"3"},"2026-12-17":{"ganzhi":"丙午","month":"11","day":"9","week":"4"},"2026-12-18":{"ganzhi":"丙午","month":"11","day":"10","week":"5"},"2026-12-19":{"ganzhi":"丙午","month":"11","day":"11","week":"6"},"2026-12-20":{"ganzhi":"丙午","month":"11","day":"12","week":"7"},"2026-12-21":{"ganzhi":"丙午","month":"11","day":"13","week":"1"},"2026-12-22":{"ganzhi":"丙午","month":"11","day":"14","week":"2"},"2026-12-23":{"ganzhi":"丙午","month":"11","day":"15","week":"3"},"2026-12-24":{"ganzhi":"丙午","month":"11","day":"16","week":"4"},"2026-12-25":{"ganzhi":"丙午","month":"11","day":"17","week":"5"},"2026-12-26":{"ganzhi":"丙午","month":"11","day":"18","week":"6"},"2026-12-27":{"ganzhi":"丙午","month":"11","day":"19","week":"7"},"2026-12-28":{"ganzhi":"丙午","month":"11","day":"20","week":"1"},"2026-12-29":{"ganzhi":"丙午","month":"11","day":"21","week":"2"},"2026-12-30":{"ganzhi":"丙午","month":"11","day":"22","week":"3"},"2026-12-31":{"ganzhi":"丙午","month":"11","day":"23","week":"4"}};
-    const SOLAR_TERMS_2026 = {"2026-01-05":{"term":"小寒","time":"16:23"},"2026-01-20":{"term":"大寒","time":"09:45"},"2026-02-04":{"term":"立春","time":"04:02"},"2026-02-18":{"term":"雨水","time":"23:52"},"2026-03-05":{"term":"驚蟄","time":"21:59"},"2026-03-20":{"term":"春分","time":"22:46"},"2026-04-05":{"term":"清明","time":"02:40"},"2026-04-20":{"term":"穀雨","time":"09:39"},"2026-05-05":{"term":"立夏","time":"19:49"},"2026-05-21":{"term":"小滿","time":"08:37"},"2026-06-05":{"term":"芒種","time":"23:48"},"2026-06-21":{"term":"夏至","time":"16:24"},"2026-07-07":{"term":"小暑","time":"09:57"},"2026-07-23":{"term":"大暑","time":"03:13"},"2026-08-07":{"term":"立秋","time":"19:43"},"2026-08-23":{"term":"處暑","time":"10:19"},"2026-09-07":{"term":"白露","time":"22:41"},"2026-09-23":{"term":"秋分","time":"08:05"},"2026-10-08":{"term":"寒露","time":"14:29"},"2026-10-23":{"term":"霜降","time":"17:38"},"2026-11-07":{"term":"立冬","time":"17:52"},"2026-11-22":{"term":"小雪","time":"15:23"},"2026-12-07":{"term":"大雪","time":"10:52"},"2026-12-22":{"term":"冬至","time":"04:50"}};
-
     // ==================== API串接：今日天氣（GAS代理） ====================
     const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbwNvJlF8fHZSZbm8k7rcEXL7Yw1BssQ35LCxPrMfAr_dkPcTwJQ3Cqooyb3KoT0HmoB4g/exec';
     const FALLBACK_COUNTY = '台中市';
@@ -467,26 +468,110 @@
     }
     function setText_(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 
-    // 農曆/節氣對照表目前只有2026年；跨年後查不到時回傳空字串，畫面自動隱藏（每年底需補下一年資料）
-    function lunarLabel(dateStr) {
-      const l = LUNAR_2026[dateStr];
-      if (!l) return '';
-      const isLeap = String(l.month).includes('閏');
-      const monthNum = parseInt(String(l.month).replace('閏', ''), 10);
-      const monthName = (isLeap ? '閏' : '') + (LUNAR_MONTH_NAME[monthNum] || monthNum) + '月';
-      const dayName = LUNAR_DAY_NAME[parseInt(l.day, 10)] || l.day;
-      return `農曆${monthName}${dayName}`;
+    // ==================== 農曆／節氣：天文演算法，不需每年維護資料 ====================
+    // 依Meeus《Astronomical Algorithms》計算太陽黃經與朔（新月），以台北時間(UTC+8)日界判定。
+    // 規則同官方農民曆：含冬至的朔月為十一月；兩個十一月之間有13個月時，第一個不含中氣的月為閏月。
+    // 驗證：2026全年365天與氣象署資料逐日吻合；2026~2036春節、2025/2028/2031/2033/2036閏月皆正確。
+    // 限制：節氣時刻誤差約3分鐘內（只影響「恰在午夜前後幾分鐘」的節氣日）；2050年後誤差會逐漸變大。
+    const RAD_ = Math.PI / 180;
+    const sinD_ = d => Math.sin(d * RAD_);
+    const TERM_NAMES_ = ['春分', '清明', '穀雨', '立夏', '小滿', '芒種', '夏至', '小暑', '大暑', '立秋', '處暑', '白露',
+      '秋分', '寒露', '霜降', '立冬', '小雪', '大雪', '冬至', '小寒', '大寒', '立春', '雨水', '驚蟄'];
+    /** ΔT（TT與UT之差，秒），2005~2050年近似式 */
+    function deltaT_(year) { const t = year - 2000; return 62.92 + 0.32217 * t + 0.005589 * t * t; }
+    /** 台北日序：把台北日期轉成整數，日界線在台北00:00；與wallDay_互通 */
+    function dayNum_(y, m, d) { return Math.floor(Date.UTC(y, m - 1, d) / 86400000) + 2440588; }
+    function wallDay_(jdUt) { return Math.floor(jdUt + 8 / 24 + 0.5); }
+    /** 太陽視黃經（度）；jdUt為UT儒略日 */
+    function sunLon_(jdUt) {
+      const jde = jdUt + deltaT_(2000 + (jdUt - 2451545) / 365.25) / 86400;
+      const T = (jde - 2451545) / 36525;
+      const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+      const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+      const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * sinD_(M) + (0.019993 - 0.000101 * T) * sinD_(2 * M) + 0.000289 * sinD_(3 * M);
+      let lon = L0 + C - 0.00569 - 0.00478 * sinD_(125.04 - 1934.136 * T);
+      lon = ((lon % 360) + 360) % 360;
+      // 低精度公式的系統誤差修正（以氣象署2026年24節氣時刻擬合，殘差<3分鐘）
+      lon -= 0.00346 + 0.00406 * Math.cos(lon * RAD_) + 0.00132 * Math.sin(lon * RAD_) - 0.0003 * Math.cos(2 * lon * RAD_) + 0.00073 * Math.sin(2 * lon * RAD_);
+      return ((lon % 360) + 360) % 360;
+    }
+    /** 太陽到達黃經target度的UT儒略日（牛頓法，jdGuess為近似起點） */
+    function solarTermJd_(target, jdGuess) {
+      let jd = jdGuess;
+      for (let i = 0; i < 6; i++) {
+        const diff = ((target - sunLon_(jd) + 540) % 360) - 180;
+        jd += diff / 0.9856;
+        if (Math.abs(diff) < 1e-5) break;
+      }
+      return jd;
+    }
+    /** 第k個朔（k=0約為2000-01-06）的UT儒略日，Meeus第49章（含月、日、行星週期項） */
+    function newMoonJd_(k) {
+      const T = k / 1236.85;
+      const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+      const M = 2.5534 + 29.1053567 * k - 0.0000014 * T * T - 0.00000011 * T ** 3;
+      const Mp = 201.5643 + 385.81693528 * k + 0.0107582 * T * T + 0.00001238 * T ** 3 - 0.000000058 * T ** 4;
+      const F = 160.7108 + 390.67050284 * k - 0.0016118 * T * T - 0.00000227 * T ** 3 + 0.000000011 * T ** 4;
+      const O = 124.7746 - 1.56375588 * k + 0.0020672 * T * T + 0.00000215 * T ** 3;
+      let jde = 2451550.09766 + 29.530588861 * k + 0.00015437 * T * T - 0.00000015 * T ** 3 + 0.00000000073 * T ** 4;
+      jde += -0.4072 * sinD_(Mp) + 0.17241 * E * sinD_(M) + 0.01608 * sinD_(2 * Mp) + 0.01039 * sinD_(2 * F)
+        + 0.00739 * E * sinD_(Mp - M) - 0.00514 * E * sinD_(Mp + M) + 0.00208 * E * E * sinD_(2 * M)
+        - 0.00111 * sinD_(Mp - 2 * F) - 0.00057 * sinD_(Mp + 2 * F) + 0.00056 * E * sinD_(2 * Mp + M)
+        - 0.00042 * sinD_(3 * Mp) + 0.00042 * E * sinD_(M + 2 * F) + 0.00038 * E * sinD_(M - 2 * F)
+        - 0.00024 * E * sinD_(2 * Mp - M) - 0.00017 * sinD_(O) - 0.00007 * sinD_(Mp + 2 * M)
+        + 0.00004 * sinD_(2 * Mp - 2 * F) + 0.00004 * sinD_(3 * M) + 0.00003 * sinD_(Mp + M - 2 * F)
+        + 0.00003 * sinD_(2 * Mp + 2 * F) - 0.00003 * sinD_(Mp + M + 2 * F) + 0.00003 * sinD_(Mp - M + 2 * F)
+        - 0.00002 * sinD_(Mp - M - 2 * F) - 0.00002 * sinD_(3 * Mp + M) + 0.00002 * sinD_(4 * Mp);
+      // 行星等造成的小修正項：[角度常數, 每k增量, 振幅]
+      [[299.77, 0.107408, 0.000325], [251.88, 0.016321, 0.000165], [251.83, 26.651886, 0.000164], [349.42, 36.412478, 0.000126],
+        [84.66, 18.206239, 0.00011], [141.74, 53.303771, 0.000062], [207.14, 2.453732, 0.00006], [154.84, 7.30686, 0.000056],
+        [34.52, 27.261239, 0.000047], [207.19, 0.121824, 0.000042], [291.34, 1.844379, 0.00004], [161.72, 24.198154, 0.000037],
+        [239.56, 25.513099, 0.000035], [331.55, 3.592518, 0.000023]
+      ].forEach((a, i) => { jde += a[2] * sinD_(a[0] + a[1] * k - (i === 0 ? 0.009173 * T * T : 0)); });
+      return jde - deltaT_(2000 + (jde - 2451545) / 365.25) / 86400;
+    }
+    /** 台北某日的農曆 → {month:1~12, leap:是否閏月, day:1~30} */
+    function lunarOf_(y, m, d) {
+      const D = dayNum_(y, m, d);
+      const k0 = Math.floor((D - 2451550.09766) / 29.530588861);
+      const nm = []; // 前後各16個朔所在的台北日序（遞增）
+      for (let k = k0 - 16; k <= k0 + 16; k++) nm.push(wallDay_(newMoonJd_(k)));
+      const wsDay = yy => wallDay_(solarTermJd_(270, dayNum_(yy, 12, 22) - 0.5)); // 該年冬至所在日
+      const m11 = yy => { const ws = wsDay(yy); let s = nm[0]; for (const n of nm) if (n <= ws) s = n; return s; }; // 含冬至的朔日
+      let idx = 0;
+      for (let i = 0; i < nm.length - 1; i++) if (nm[i] <= D && D < nm[i + 1]) { idx = i; break; }
+      const wy = m11(y) <= nm[idx] ? y : y - 1; // 以哪一年的冬至當十一月起點
+      const startIdx = nm.indexOf(m11(wy));
+      let leapAt = -1;
+      if (nm.indexOf(m11(wy + 1)) - startIdx === 13) {
+        const zq = []; // 十三個中氣（黃經30°倍數）所在日
+        for (let t = 0; t < 13; t++) zq.push(wallDay_(solarTermJd_((270 + 30 * t) % 360, dayNum_(wy, 12, 22) - 0.5 + 30.44 * t)));
+        for (let i = 1; i < 13; i++) {
+          if (!zq.some(z => z >= nm[startIdx + i] && z < nm[startIdx + i + 1])) { leapAt = i; break; }
+        }
+      }
+      let month = 11, leap = false;
+      for (let i = 1; i <= idx - startIdx; i++) {
+        if (i === leapAt) leap = true; else { month = month % 12 + 1; leap = false; }
+      }
+      return { month, leap, day: D - nm[idx] + 1 };
     }
 
+    function lunarLabel(dateStr) {
+      try {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const l = lunarOf_(y, m, d);
+        return `農曆${l.leap ? '閏' : ''}${LUNAR_MONTH_NAME[l.month]}月${LUNAR_DAY_NAME[l.day]}`;
+      } catch (e) { return ''; } // 計算失敗就不顯示，不影響其他功能
+    }
+
+    /** 最近一個已發生（含當天）的節氣：取當日台北24:00的太陽黃經，每15°一個節氣 */
     function solarTermLabel(dateStr) {
-      if (!dateStr.startsWith('2026')) return '';
-      // 找「最近一個已經發生（<=今天）」的節氣
-      const dates = Object.keys(SOLAR_TERMS_2026).sort();
-      let picked = null;
-      for (const d of dates) {
-        if (d <= dateStr) picked = d; else break;
-      }
-      return picked ? SOLAR_TERMS_2026[picked].term : '';
+      try {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const jdEnd = dayNum_(y, m, d) + 1 - 0.5 - 8 / 24; // 隔日台北00:00的UT儒略日
+        return TERM_NAMES_[Math.floor(sunLon_(jdEnd) / 15)];
+      } catch (e) { return ''; }
     }
 
     // 風向角度(0~360) 轉 8方位中文
@@ -678,7 +763,7 @@ function wxIconInfo(text, isNight) {
       const dateStr = todayDateStr();
       const tn = taipeiNow_();
 
-      // 日期/農曆節氣 badge，用本地靜態資料立即顯示，不用等API；對照表沒資料(跨年)就隱藏農曆badge
+      // 日期/農曆節氣 badge，本地計算立即顯示，不用等API；計算失敗就隱藏badge
       setText_('badge-date', `${tn.y}年${tn.m}月${tn.d}日（${WEEKDAY_ZH[tn.wd]}）`);
       const lunar = lunarLabel(dateStr), term = solarTermLabel(dateStr);
       const lunarEl = document.getElementById('badge-lunar');
@@ -770,15 +855,42 @@ function wxIconInfo(text, isNight) {
       return out.join('');
     }
 
-    function buildDayPanel(dateKey, dateLabel, hidden, cols) {
-      const n = cols.length;
-      const colw = 64;
-      const gridCols = `grid-template-columns:repeat(${n},minmax(${colw}px,1fr))`;
-      const morningNight = cols.filter(c => c.hour < 6).length;
-      const daySpan = cols.filter(c => c.hour >= 6 && c.hour < 18).length;
-      const eveningNight = n - morningNight - daySpan;
+    const HOUR_COLW_ = 64; // 每小時一欄的固定寬度(px)：整條固定寬度、橫向捲動，不隨螢幕伸縮，圖表就不會被拉寬變形
+    const HOUR_TAB_BASE_ = 'hour-day-tab shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium ';
+    const HOUR_TAB_ON_ = 'bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark';
+    const HOUR_TAB_OFF_ = 'text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark';
+    let hourDays_ = [];     // [{key, x, target}]：每天起點(px)與日期按鈕要捲到的位置
+    let hourPinned_ = null; // 剛按過日期按鈕時釘住該按鈕的亮起狀態，直到使用者自己捲動才解除
+    let hourRaf_ = 0;
 
-      const dateRow = cols.map(() => `<div class="text-center">${dateLabel}</div>`).join('');
+    /** 把所有小時欄位畫成一條連續長條；回傳 {html, days:[{key,label,x}]} */
+    function buildHourStrip_(cols) {
+      const n = cols.length, colw = HOUR_COLW_, totalW = n * colw;
+      const gridCols = `grid-template-columns:repeat(${n},${colw}px)`;
+
+      // 依日期切段；日期列每天一格，日期文字 sticky 貼左，捲到該日途中仍看得到是哪天
+      const runs = [];
+      cols.forEach((c, i) => {
+        const last = runs[runs.length - 1];
+        if (last && last.key === c.dateKey) last.len++; else runs.push({ key: c.dateKey, label: c.dateLabel, start: i, len: 1 });
+      });
+      const dateRow = runs.map(r => `<div style="grid-column:span ${r.len}" class="pl-2"><span class="sticky left-2 inline-block">${r.label}</span></div>`).join('');
+      const dividers = runs.slice(1).map(r => `<div class="absolute top-0 bottom-0 border-l border-dashed border-muji-textMutedLight/30 dark:border-muji-textMutedDark/30 pointer-events-none" style="left:${r.start * colw}px"></div>`).join('');
+
+      // 日夜底色：連續同一時段合併（凌晨→白天→傍晚夜間）
+      const SEG_CLS = {
+        m: 'bg-gradient-to-b from-indigo-900/15 to-indigo-900/5 dark:from-indigo-950/40 dark:to-indigo-950/15',
+        d: 'bg-amber-500/5',
+        e: 'bg-gradient-to-b from-indigo-900/5 to-indigo-900/15 dark:from-indigo-950/15 dark:to-indigo-950/40'
+      };
+      const segs = [];
+      cols.forEach(c => {
+        const k = c.hour < 6 ? 'm' : c.hour < 18 ? 'd' : 'e';
+        const last = segs[segs.length - 1];
+        if (last && last.k === k) last.len++; else segs.push({ k, len: 1 });
+      });
+      const bgSegs = segs.map(s => `<div style="grid-column:span ${s.len}" class="${SEG_CLS[s.k]}"></div>`).join('');
+
       const timeRow = cols.map(c => c.isNow
         ? `<div class="text-center"><span class="inline-block px-2 rounded-full bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark">現在</span></div>`
         : `<div class="text-center">${c.hhmm}</div>`).join('');
@@ -790,48 +902,43 @@ function wxIconInfo(text, isNight) {
       const comfortRow = mergedCells_(cols, 'auto', 'comfortExact', c => comfortSpan_(c.comfort, ''));
       const tempLabels = mergedCells_(cols, 'auto', 'tempExact', c => `<div class="text-center">${isNaN(c.temp) ? '--' : c.temp}°</div>`);
 
+      // 溫度曲線：整條共用同一組最高/最低溫刻度，日與日之間連續不中斷
       const temps = cols.map(c => c.temp).filter(t => !isNaN(t));
       const tmin = temps.length ? Math.min(...temps) : 0, tmax = temps.length ? Math.max(...temps) : 0;
       const span = Math.max(tmax - tmin, 1);
-      const totalW = n * colw, svgH = 96; // svg高度96px(h-24)，viewBox高度同為96，垂直不縮放
+      const svgH = 96; // svg高度96px(h-24)，viewBox高度同為96
       const xs = cols.map((c, i) => colw * (i + 0.5));
       const ys = cols.map(c => 12 + (tmax - c.temp) / span * 66);
       const segColor = c => (c.hour >= 6 && c.hour < 18) ? 'text-amber-500' : 'text-indigo-400 dark:text-indigo-300';
       const segBg = c => (c.hour >= 6 && c.hour < 18) ? 'bg-amber-500' : 'bg-indigo-400 dark:bg-indigo-300';
-
       // 折線：相鄰兩點一段；兩端都有逐時真實資料→實線，否則虛線（表示該段只有3小時預報）
-      // vector-effect=non-scaling-stroke：欄寬隨螢幕伸縮時線寬/虛線長度維持固定，不會變形
       const paths = cols.slice(0, -1).map((c, i) => {
         const nx = cols[i + 1];
         if (isNaN(ys[i]) || isNaN(ys[i + 1])) return '';
         const dashed = !(c.tempExact && nx.tempExact);
         return `<path d="M ${xs[i].toFixed(1)} ${ys[i].toFixed(1)} L ${xs[i + 1].toFixed(1)} ${ys[i + 1].toFixed(1)}" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"${dashed ? ' stroke-dasharray="5 4"' : ''} class="${segColor(c)}" />`;
       }).join('');
-      // 圓點用HTML圓形元素（SVG會被橫向拉成橢圓），位置以百分比對齊欄位中心；svg在容器底部，上方留16px
+      // 圓點用HTML圓形元素（避免SVG被拉成橢圓）；svg在容器底部，上方留16px
       const dots = cols.map((c, i) => {
         if (isNaN(ys[i])) return '';
         const show = c.tempExact || i === 0 || cols[i - 1].blockIdx !== c.blockIdx;
-        return show ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${((i + 0.5) / n * 100).toFixed(2)}%;top:${(16 + ys[i]).toFixed(1)}px"></span>` : '';
+        return show ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(16 + ys[i]).toFixed(1)}px"></span>` : '';
       }).join('');
-      const svg = `<svg class="w-full h-24 absolute bottom-0 inset-x-0 z-10" viewBox="0 0 ${totalW} ${svgH}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${dots}`;
+      const svg = `<svg class="absolute bottom-0 left-0 h-24 z-10" style="width:${totalW}px" viewBox="0 0 ${totalW} ${svgH}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${dots}`;
       const approxNote = cols.some(c => !c.tempExact)
         ? '<p class="text-[10px] mt-1 text-muji-textMutedLight dark:text-muji-textMutedDark">虛線／跨欄＝3小時預報</p>' : '';
 
-      return `
-          <div id="hour-day-${dateKey}" class="hour-day-panel${hidden ? ' hidden' : ''}">
-           <div class="overflow-x-auto no-scrollbar pb-2">
-            <div class="relative" style="min-width:${n * colw}px">
-              <div class="absolute inset-0 grid pointer-events-none rounded-2xl overflow-hidden top-[52px] bottom-0" style="${gridCols}">
-                ${morningNight > 0 ? `<div style="grid-column:span ${morningNight}" class="bg-gradient-to-b from-indigo-900/15 to-indigo-900/5 dark:from-indigo-950/40 dark:to-indigo-950/15"></div>` : ''}
-                ${daySpan > 0 ? `<div style="grid-column:span ${daySpan}" class="bg-amber-500/5"></div>` : ''}
-                ${eveningNight > 0 ? `<div style="grid-column:span ${eveningNight}" class="bg-gradient-to-b from-indigo-900/5 to-indigo-900/15 dark:from-indigo-950/15 dark:to-indigo-950/40"></div>` : ''}
-              </div>
+      const html = `
+          <div id="hour-strip" class="overflow-x-auto no-scrollbar pb-2 rounded-2xl md:cursor-grab focus-visible:outline focus-visible:outline-2 focus-visible:outline-muji-textMutedLight/50" tabindex="0" role="region" aria-label="逐時預報，可左右捲動">
+            <div class="relative" style="width:${totalW}px">
+              <div class="absolute inset-0 grid pointer-events-none rounded-2xl overflow-hidden top-[52px] bottom-0" style="${gridCols}">${bgSegs}</div>
+              ${dividers}
               <div class="relative flex flex-col space-y-3 pt-2 text-xs z-10">
                 <div class="grid font-bold border-b border-muji-borderLight dark:border-muji-borderDark pb-2 text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${dateRow}</div>
                 <div class="grid font-medium" style="${gridCols}">${timeRow}</div>
                 <div class="grid text-base my-1" style="${gridCols}">${wxRow}</div>
                 <div class="h-28 relative">
-                  <div class="grid w-full absolute top-1 z-20 font-mono font-bold" style="${gridCols}">${tempLabels}</div>
+                  <div class="grid absolute top-1 left-0 z-20 font-mono font-bold" style="${gridCols};width:${totalW}px">${tempLabels}</div>
                   ${svg}
                 </div>
                 <div class="grid text-blue-600 dark:text-blue-400 font-medium" style="${gridCols}">${rainRow}</div>
@@ -840,14 +947,81 @@ function wxIconInfo(text, isNight) {
                 <div class="grid text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 pb-2 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25" style="${gridCols}">${comfortRow}</div>
               </div>
             </div>
-           </div>
-           ${approxNote}
-          </div>`;
+          </div>
+          ${approxNote}`;
+      return { html, days: runs.map(r => ({ key: r.key, label: r.label, x: r.start * colw })) };
+    }
+
+    // ---- 逐時長條的捲動控制：日期按鈕跳轉、捲動時同步亮起日期、桌機箭頭與拖曳 ----
+    function hourScrollBehavior_() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
+    function setHourTab_(key) {
+      const tabsEl = document.getElementById('hour-day-tabs');
+      document.querySelectorAll('.hour-day-tab').forEach(btn => {
+        const on = btn.id === `hourtab-${key}`;
+        btn.className = HOUR_TAB_BASE_ + (on ? HOUR_TAB_ON_ : HOUR_TAB_OFF_);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on && tabsEl && btn.offsetLeft + btn.offsetWidth > tabsEl.scrollLeft + tabsEl.clientWidth) tabsEl.scrollLeft = btn.offsetLeft + btn.offsetWidth - tabsEl.clientWidth + 8;
+        if (on && tabsEl && btn.offsetLeft < tabsEl.scrollLeft) tabsEl.scrollLeft = Math.max(0, btn.offsetLeft - 8);
+      });
+    }
+    function onHourScroll_() {
+      const sc = document.getElementById('hour-strip');
+      if (!sc) return;
+      const max = sc.scrollWidth - sc.clientWidth;
+      const prev = document.getElementById('hour-prev'), next = document.getElementById('hour-next');
+      if (prev) prev.disabled = sc.scrollLeft <= 1;
+      if (next) next.disabled = sc.scrollLeft >= max - 1;
+      if (hourPinned_ || hourDays_.length === 0) return;
+      let key = hourDays_[0].key;
+      for (const d of hourDays_) if (d.x <= sc.scrollLeft + 8) key = d.key;
+      if (max > 1 && sc.scrollLeft >= max - 1) key = hourDays_[hourDays_.length - 1].key; // 捲到底＝最後一天
+      setHourTab_(key);
+    }
+    function setupHourStrip_() {
+      const sc = document.getElementById('hour-strip');
+      if (!sc) return;
+      sc.addEventListener('scroll', () => {
+        if (hourRaf_) return;
+        hourRaf_ = requestAnimationFrame(() => { hourRaf_ = 0; onHourScroll_(); });
+      }, { passive: true });
+      // 使用者自己操作（滾輪/觸控/拖曳/鍵盤）就解除按鈕釘選，改由捲動位置決定亮哪一天
+      ['wheel', 'touchstart', 'keydown'].forEach(ev => sc.addEventListener(ev, () => { hourPinned_ = null; }, { passive: true }));
+      // 滑鼠拖曳（觸控與觸控板用瀏覽器原生捲動）
+      let drag = null;
+      sc.addEventListener('pointerdown', e => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        hourPinned_ = null;
+        drag = { x: e.clientX, left: sc.scrollLeft };
+        sc.setPointerCapture(e.pointerId);
+        sc.classList.add('cursor-grabbing', 'select-none');
+      });
+      sc.addEventListener('pointermove', e => { if (drag) sc.scrollLeft = drag.left - (e.clientX - drag.x); });
+      const endDrag = () => { drag = null; sc.classList.remove('cursor-grabbing', 'select-none'); };
+      sc.addEventListener('pointerup', endDrag);
+      sc.addEventListener('pointercancel', endDrag);
+      onHourScroll_();
+    }
+    /** 日期按鈕：今日→捲到「現在」，其他日→捲到該日零時（資料最早的一欄） */
+    function switchHourDay(key) {
+      const sc = document.getElementById('hour-strip');
+      const d = hourDays_.find(x => x.key === key);
+      if (!sc || !d) return;
+      hourPinned_ = key;
+      setHourTab_(key);
+      sc.scrollTo({ left: d.target, behavior: hourScrollBehavior_() });
+    }
+    /** 桌機左右箭頭：每次捲動約一個畫面寬度的 3/4 */
+    function scrollHourBy_(dir) {
+      const sc = document.getElementById('hour-strip');
+      if (!sc) return;
+      hourPinned_ = null;
+      sc.scrollBy({ left: dir * Math.max(HOUR_COLW_ * 3, sc.clientWidth * 0.75), behavior: hourScrollBehavior_() });
     }
 
     let hourSeq = 0;
     async function loadHourlyForecast() {
       const seq = ++hourSeq;
+      hourDays_ = []; hourPinned_ = null;
       const tabsEl = document.getElementById('hour-day-tabs');
       const panelsEl = document.getElementById('hour-day-panels');
       tabsEl.innerHTML = `<div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div><div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>`;
@@ -933,26 +1107,20 @@ function wxIconInfo(text, isNight) {
         return;
       }
 
-      // 依日期分組，天數不設限（依API實際涵蓋範圍，通常3~4天）
-      const dayMap = new Map();
-      allCols.forEach(c => {
-        if (!dayMap.has(c.dateKey)) dayMap.set(c.dateKey, []);
-        dayMap.get(c.dateKey).push(c);
-      });
-      const dayKeys = [...dayMap.keys()];
-
-      tabsEl.innerHTML = dayKeys.map((k, i) => {
-        const label = dayMap.get(k)[0].dateLabel; // MM/DD (週) 全部顯示
-        const activeCls = i === 0
-          ? 'hour-day-tab shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark'
-          : 'hour-day-tab shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark';
-        return `<button type="button" onclick="switchHourDay('${k}')" id="hourtab-${k}" class="${activeCls}">${label}</button>`;
-      }).join('');
-
-      panelsEl.innerHTML = dayKeys.map((k, i) => {
-        const cols = dayMap.get(k);
-        return buildDayPanel(k, cols[0].dateLabel, i !== 0, cols);
-      }).join('');
+      // 整條一次畫出；日期按鈕只負責跳轉與同步亮起
+      const strip = buildHourStrip_(allCols);
+      const tn = taipeiNow_(), todayKey = `${pad2(tn.m)}${pad2(tn.d)}`;
+      const nowIdx = Math.max(0, allCols.findIndex(c => c.isNow));
+      hourDays_ = strip.days.map(d => ({
+        key: d.key, x: d.x,
+        target: d.key === todayKey ? Math.max(0, nowIdx * HOUR_COLW_ - HOUR_COLW_) : d.x // 今日：現在往左留一欄；其他日：該日起點
+      }));
+      tabsEl.innerHTML = strip.days.map(d =>
+        `<button type="button" onclick="switchHourDay('${d.key}')" id="hourtab-${d.key}" aria-pressed="false" class="${HOUR_TAB_BASE_}${HOUR_TAB_OFF_}">${d.key === todayKey ? '今日' : d.label}</button>`).join('');
+      panelsEl.innerHTML = strip.html;
+      hourPinned_ = null;
+      setHourTab_(strip.days[0].key);
+      setupHourStrip_();
     }
 
     loadHourlyForecast();
@@ -1282,17 +1450,6 @@ function switchMapSubTab(subTab) {
     stopRadar_();
   }
 }
-
-    // 2b. 逐時預報日期分頁切換
-    function switchHourDay(dateKey) {
-      document.querySelectorAll('.hour-day-panel').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`hour-day-${dateKey}`).classList.remove('hidden');
-
-      document.querySelectorAll('.hour-day-tab').forEach(btn => {
-        btn.className = "hour-day-tab shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark";
-      });
-      document.getElementById(`hourtab-${dateKey}`).className = "hour-day-tab shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark";
-    }
 
 // ==================== 通用跳出視窗（modal）：開啟時移動焦點、關閉時還原焦點、Esc 可關閉 ====================
 const MODALS_ = [
