@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-06 #2 18:44 逐時天氣／降雨／風向每小時顯示、日夜依日出日落、today 帶經緯度、無障礙與可維護性小修 -->
+<!-- 版本：2026-11-06 #3 19:08 日期按鈕跳06:00、地震卡收合顯示最新一筆、定位成功直接套用、溫度折線只標真實資料點 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -234,6 +234,7 @@
     <h4 class="text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-house-crack text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 地震報告</h4>
     <span class="flex items-center gap-1.5 text-[10px] text-muji-textMutedLight dark:text-muji-textMutedDark"><i id="eq-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
   </button>
+  <div id="eq-latest" class="mt-3"></div>
   <div id="earthquake-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-xs space-y-1"></div>
 </div>
       </div>
@@ -989,7 +990,9 @@ function wxIconInfo(text, isNight) {
       const rhRow = mergedCells_(cols, 'auto', 'rhExact', c => rhSpan_(c.rh, ''));
       const windRow = cols.map(c => windSpan_(c.wind, '')).join('');
       const comfortRow = mergedCells_(cols, 'auto', 'comfortExact', c => comfortSpan_(c.comfort, ''));
-      const tempLabels = mergedCells_(cols, 'auto', 'tempExact', c => `<div class="text-center">${isNaN(c.temp) ? '--' : c.temp}°</div>`);
+      // 溫度「真實資料點」：有逐時資料的每一小時；只有3小時資料的區段只取區段第一欄。標籤、圓點、折線都只用這些點
+      const isReal = (c, i) => !isNaN(c.temp) && (c.tempExact || i === 0 || cols[i - 1].blockIdx !== c.blockIdx);
+      const tempLabels = cols.map((c, i) => `<div class="text-center">${isReal(c, i) ? c.temp + '°' : ''}</div>`).join('');
 
       // 溫度曲線：整條共用同一組最高/最低溫刻度，日與日之間連續不中斷
       const temps = cols.map(c => c.temp).filter(t => !isNaN(t));
@@ -1001,17 +1004,16 @@ function wxIconInfo(text, isNight) {
       const segColor = c => !isNightHour_(c.hour) ? 'text-amber-500' : 'text-indigo-400 dark:text-indigo-300';
       const segBg = c => !isNightHour_(c.hour) ? 'bg-amber-500' : 'bg-indigo-400 dark:bg-indigo-300';
       // 折線：相鄰兩點一段；兩端都有逐時真實資料→實線，否則虛線（表示該段只有3小時預報）
-      const paths = cols.slice(0, -1).map((c, i) => {
-        const nx = cols[i + 1];
-        if (isNaN(ys[i]) || isNaN(ys[i + 1])) return '';
+      const realIdx = cols.map((c, i) => isReal(c, i) ? i : -1).filter(i => i >= 0);
+      const paths = realIdx.slice(0, -1).map((i, k) => {
+        const j = realIdx[k + 1], c = cols[i], nx = cols[j];
         const dashed = !(c.tempExact && nx.tempExact);
-        return `<path d="M ${xs[i].toFixed(1)} ${ys[i].toFixed(1)} L ${xs[i + 1].toFixed(1)} ${ys[i + 1].toFixed(1)}" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"${dashed ? ' stroke-dasharray="5 4"' : ''} class="${segColor(c)}" />`;
+        return `<path d="M ${xs[i].toFixed(1)} ${ys[i].toFixed(1)} L ${xs[j].toFixed(1)} ${ys[j].toFixed(1)}" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"${dashed ? ' stroke-dasharray="5 4"' : ''} class="${segColor(c)}"/>`;
       }).join('');
       // 圓點用HTML圓形元素（避免SVG被拉成橢圓）；svg在容器底部，上方留16px
       const dots = cols.map((c, i) => {
         if (isNaN(ys[i])) return '';
-        const show = c.tempExact || i === 0 || cols[i - 1].blockIdx !== c.blockIdx;
-        return show ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(STRIP_.DOT_TOP + ys[i]).toFixed(1)}px"></span>` : '';
+        return isReal(c, i) ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(STRIP_.DOT_TOP + ys[i]).toFixed(1)}px"></span>` : '';
       }).join('');
       const svg = `<svg class="absolute bottom-0 left-0 z-10" style="width:${totalW}px;height:${svgH}px" viewBox="0 0 ${totalW} ${svgH}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${dots}`;
       // 讀屏用文字摘要：長條本身 aria-hidden，每3小時一筆唸出時間、天氣、溫度、降雨、風向
@@ -1244,7 +1246,8 @@ function wxIconInfo(text, isNight) {
       const nowIdx = Math.max(0, cols.findIndex(c => c.isNow));
       hourDays_ = strip.days.map(d => ({
         key: d.key, x: d.x,
-        target: d.key === todayKey ? Math.max(0, nowIdx * HOUR_COLW_ - HOUR_COLW_) : d.x // 今日：現在往左留一欄；其他日：該日起點
+        target: d.key === todayKey ? Math.max(0, nowIdx * HOUR_COLW_ - HOUR_COLW_) // 今日：現在往左留一欄
+          : (i6 => i6 >= 0 ? i6 * HOUR_COLW_ : d.x)(cols.findIndex(c => c.dateKey === d.key && c.hour === 6)) // 其他日：該日06:00，沒有就該日起點
       }));
       tabsEl.innerHTML = strip.days.map(d =>
         `<button type="button" onclick="switchHourDay('${d.key}')" id="hourtab-${d.key}" class="${HOUR_TAB_BASE_}${HOUR_TAB_OFF_}">${d.key === todayKey ? '今日' : d.label}</button>`).join('');
@@ -1855,7 +1858,7 @@ async function loadEarthquake() {
 }
 
 function renderEarthquakeList() {
-  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map((eq, i) => {
+  const row = (eq, i) => {
     const mi = maxIntensity_(eq.areas);
     return `<button type="button" onclick="openEarthquakeDetail(${i})" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
       <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-[10px] font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
@@ -1866,12 +1869,16 @@ function renderEarthquakeList() {
         <span class="block text-[9px] opacity-70">${escapeHtml_((eq.originTime || '').slice(5))}</span>
       </span>
     </button>`;
-  }).join('');
+  };
+  // 收合時只顯示最新一筆；展開後顯示完整清單（最新一筆在清單內，所以展開時隱藏摘要）
+  document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0);
+  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map(row).join('');
 }
 
 function toggleEarthquakeList() {
   const list = document.getElementById('earthquake-list');
   const open = list.classList.toggle('hidden') === false;
+  document.getElementById('eq-latest').classList.toggle('hidden', open);
   document.getElementById('eq-chevron').classList.toggle('rotate-180', open);
   document.getElementById('eq-toggle').setAttribute('aria-expanded', String(open));
 }
@@ -2028,10 +2035,9 @@ function switchLocation(county, township) {
           return;
         }
         if (!townshipsData) await loadTownships();
-        document.getElementById('select-county').value = res.county;
-        onCountyChange();
-        document.getElementById('select-township').value = res.township;
-        statusEl.textContent = `${res.county}${res.township}，按「套用」確認`;
+        switchLocation(res.county, res.township);
+        statusEl.textContent = '';
+        toggleLocationModal(false);
       }, (err) => {
         const GEO_ERR_MSG = { 1: '未授權定位', 2: '無法取得位置', 3: '定位逾時' };
         statusEl.textContent = `${GEO_ERR_MSG[err.code] || '定位失敗'}，請手動選擇`;
