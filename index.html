@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-04 #4 19:50 逐時預報改單一長條、農曆節氣改自動計算 -->
+<!-- 版本：2026-11-06 #1 06:30 逐時天氣圖示每小時顯示、第三輪審查修正（焦點、讀屏摘要、自動更新、inert 等） -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -68,6 +68,8 @@
     #mobile-bottom-nav { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
     /* 鍵盤操作時的焦點外框 */
     :focus-visible { outline: 2px solid #8C8275; outline-offset: 2px; }
+    /* 固定標頭與底部導覽不遮住被聚焦／捲到的元素 */
+    html { scroll-padding-top: 6rem; scroll-padding-bottom: 5rem; }
   </style>
 </head>
 <body class="bg-muji-bgLight dark:bg-muji-bgDark text-muji-textPrimaryLight dark:text-muji-textPrimaryDark min-h-screen flex flex-col items-center pb-24 lg:pb-8">
@@ -82,7 +84,7 @@
       <div class="flex items-center gap-3 shrink-0">
         <img src="favicon.svg" alt="MK天氣" class="w-8 h-8 rounded-full">
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-wide">天氣預報</h1>
+          <h1 tabindex="-1" class="text-base sm:text-lg font-bold tracking-wide">天氣預報</h1>
           <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark flex items-center gap-2">
             <button type="button" onclick="toggleLocationModal(true)" id="header-location-btn" aria-label="變更地點" class="hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-colors"><i class="fa-solid fa-location-dot"></i> <span id="header-location-text">台中市東區</span></button>
             <span class="opacity-40">|</span>
@@ -127,7 +129,7 @@
     <h4 class="text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> 天氣特報</h4>
     <span class="flex items-center gap-1.5 text-[10px] text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="alert-count-text"></span> <span id="alert-toggle-hint"></span> <i id="alert-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
   </button>
-  <div id="alert-top" class="mt-3 text-xs"></div>
+  <div id="alert-top" role="status" class="mt-3 text-xs"></div>
   <div id="alert-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-xs space-y-1"></div>
 </div>
 
@@ -153,7 +155,7 @@
                 </div>
               </div>
               <p id="obs-source" class="text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="obs-station-text"></span><span id="aqi-station-text"></span></p>
-              <p id="today-retry" class="hidden text-xs text-red-600 dark:text-red-400">載入失敗 <button type="button" onclick="loadTodayWeather()" class="underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button></p>
+              <p id="today-retry" role="alert" class="hidden text-xs text-red-600 dark:text-red-400">載入失敗 <button type="button" onclick="loadTodayWeather()" class="underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button></p>
             </div>
 
             <!-- 天氣現象小卡：icon圖案與顏色隨O-A0003現在天氣變換，附F-D0047預報天氣 -->
@@ -204,14 +206,13 @@
               <i class="fa-solid fa-clock text-xs"></i> 逐時預報
             </h3>
             <div class="flex items-center gap-3 min-w-0 max-w-full">
-              <div id="hour-day-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar min-w-0">
+              <div id="hour-day-tabs" class="relative flex items-center gap-2 overflow-x-auto no-scrollbar min-w-0">
                 <div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>
                 <div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>
               </div>
-              <i class="fa-solid fa-arrows-left-right text-xs shrink-0 md:hidden text-muji-textMutedLight dark:text-muji-textMutedDark" role="img" aria-label="可左右滑動" title="可左右滑動"></i>
               <div class="hidden md:flex items-center gap-1 shrink-0">
-                <button type="button" id="hour-prev" onclick="scrollHourBy_(-1)" aria-label="向左" title="向左" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark disabled:opacity-30 disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-left text-xs" aria-hidden="true"></i></button>
-                <button type="button" id="hour-next" onclick="scrollHourBy_(1)" aria-label="向右" title="向右" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark disabled:opacity-30 disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i></button>
+                <button type="button" id="hour-prev" onclick="scrollHourBy_(-1)" aria-disabled="true" aria-label="逐時預報向左捲動" title="向左" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark aria-disabled:opacity-30 aria-disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-left text-xs" aria-hidden="true"></i></button>
+                <button type="button" id="hour-next" onclick="scrollHourBy_(1)" aria-disabled="true" aria-label="逐時預報向右捲動" title="向右" class="w-7 h-7 rounded-full border border-muji-borderLight dark:border-muji-borderDark text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark aria-disabled:opacity-30 aria-disabled:pointer-events-none transition"><i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i></button>
               </div>
             </div>
           </div>
@@ -344,7 +345,7 @@
   </div>
 
   <!-- 回到頁首：捲動超過一屏才顯示；手機版避開底部導覽列 -->
-  <button type="button" id="btn-top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" aria-label="回到頁首" title="回到頁首" class="fixed right-4 z-40 w-10 h-10 rounded-full bg-muji-cardLight/95 dark:bg-muji-cardDark/95 border border-muji-borderLight dark:border-muji-borderDark shadow-md flex items-center justify-center text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-opacity duration-300 opacity-0 pointer-events-none lg:bottom-6" style="bottom:calc(4.75rem + env(safe-area-inset-bottom))">
+  <button type="button" id="btn-top" inert onclick="scrollToTop_()" aria-label="回到頁首" title="回到頁首" class="fixed right-4 z-40 w-10 h-10 rounded-full bg-muji-cardLight/95 dark:bg-muji-cardDark/95 border border-muji-borderLight dark:border-muji-borderDark shadow-md flex items-center justify-center text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-opacity duration-300 opacity-0 pointer-events-none lg:bottom-6" style="bottom:calc(4.75rem + env(safe-area-inset-bottom))">
     <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
   </button>
 
@@ -384,7 +385,7 @@
         <div id="favorites-list" class="flex flex-wrap gap-2"></div>
       </div>
 
-      <p id="location-status" class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark min-h-[16px]"></p>
+      <p id="location-status" role="status" class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark min-h-[16px]"></p>
     </div>
   </div>
 
@@ -572,6 +573,23 @@
         const jdEnd = dayNum_(y, m, d) + 1 - 0.5 - 8 / 24; // 隔日台北00:00的UT儒略日
         return TERM_NAMES_[Math.floor(sunLon_(jdEnd) / 15)];
       } catch (e) { return ''; }
+    }
+
+    /** 農曆／節氣自我檢查：改動上面的演算法後，在瀏覽器 console 輸入 selfTestLunar_() 執行。
+     *  回傳 {ok, checked, fail}；ok 為 true 代表全部符合（基準：氣象署2026年資料、2025～2036年春節與閏月）。 */
+    function selfTestLunar_() {
+      const lunarCases = [['2026-01-01', '11/13'], ['2026-02-17', '1/1'], ['2026-11-04', '9/26'], ['2027-02-06', '1/1'], ['2030-02-03', '1/1'],
+        ['2025-07-25', '閏6/1'], ['2028-06-23', '閏5/1'], ['2031-04-22', '閏3/1'], ['2033-12-22', '閏11/1'], ['2036-07-23', '閏6/1']];
+      const termCases = [['2026-02-04', '立春'], ['2026-02-18', '雨水'], ['2026-06-05', '芒種'], ['2026-11-07', '立冬'], ['2026-12-22', '冬至']];
+      const fail = [];
+      lunarCases.forEach(([d, exp]) => {
+        const [y, m, dd] = d.split('-').map(Number);
+        const l = lunarOf_(y, m, dd);
+        const got = `${l.leap ? '閏' : ''}${l.month}/${l.day}`;
+        if (got !== exp) fail.push({ date: d, expect: exp, got });
+      });
+      termCases.forEach(([d, exp]) => { const got = solarTermLabel(d); if (got !== exp) fail.push({ date: d, expect: exp, got }); });
+      return { ok: fail.length === 0, checked: lunarCases.length + termCases.length, fail };
     }
 
     // 風向角度(0~360) 轉 8方位中文
@@ -862,6 +880,9 @@ function wxIconInfo(text, isNight) {
     let hourDays_ = [];     // [{key, x, target}]：每天起點(px)與日期按鈕要捲到的位置
     let hourPinned_ = null; // 剛按過日期按鈕時釘住該按鈕的亮起狀態，直到使用者自己捲動才解除
     let hourRaf_ = 0;
+    let hourActiveKey_ = null;   // 目前亮起的日期按鈕，沒變就不重畫
+    let hourlyLoadedKey_ = null; // 逐時資料載入時的「日期＋整點」，用來偵測「現在」欄是否過期
+    function tickKey_() { const n = taipeiNow_(); return `${n.y}-${pad2(n.m)}-${pad2(n.d)} ${pad2(n.h)}`; }
 
     /** 把所有小時欄位畫成一條連續長條；回傳 {html, days:[{key,label,x}]} */
     function buildHourStrip_(cols) {
@@ -894,8 +915,8 @@ function wxIconInfo(text, isNight) {
       const timeRow = cols.map(c => c.isNow
         ? `<div class="text-center"><span class="inline-block px-2 rounded-full bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark">現在</span></div>`
         : `<div class="text-center">${c.hhmm}</div>`).join('');
-      // 3小時一筆的資料（天氣/降雨機率/風向）→ 同區塊合併成一格；逐時資料（濕度/舒適度/溫度）→ 有逐時才各自一格
-      const wxRow = mergedCells_(cols, 'block', '', c => wxSpan_(c.weather, c.hour >= 18 || c.hour < 6, ''));
+      // 降雨機率/風向為3小時一筆 → 同區塊合併成一格；天氣圖示每小時重複；逐時資料（濕度/舒適度/溫度）→ 有逐時才各自一格
+      const wxRow = cols.map(c => wxSpan_(c.weather, c.hour >= 18 || c.hour < 6, '')).join(''); // 每小時一個圖示（同一個3小時區間重複顯示）
       const rainRow = mergedCells_(cols, 'block', '', c => rainSpan_(c.pop, ''));
       const rhRow = mergedCells_(cols, 'auto', 'rhExact', c => rhSpan_(c.rh, ''));
       const windRow = mergedCells_(cols, 'block', '', c => windSpan_(c.wind, ''));
@@ -925,37 +946,50 @@ function wxIconInfo(text, isNight) {
         return show ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(16 + ys[i]).toFixed(1)}px"></span>` : '';
       }).join('');
       const svg = `<svg class="absolute bottom-0 left-0 h-24 z-10" style="width:${totalW}px" viewBox="0 0 ${totalW} ${svgH}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${dots}`;
-      const approxNote = cols.some(c => !c.tempExact)
-        ? '<p class="text-[10px] mt-1 text-muji-textMutedLight dark:text-muji-textMutedDark">虛線／跨欄＝3小時預報</p>' : '';
+      // 讀屏用文字摘要：長條本身 aria-hidden，每3小時一筆唸出時間、天氣、溫度、降雨、風向
+      const srItems = cols.filter((c, i) => i === 0 || c.hour % 3 === 0).map(c => {
+        const parts = [`${c.isNow ? '現在 ' : ''}${c.dateLabel} ${c.hhmm}`, c.weather, isNaN(c.temp) ? '' : `${c.temp}度`,
+          hasVal_(c.pop) ? `降雨機率${c.pop}%` : '', c.wind, hasVal_(c.rh) ? `濕度${c.rh}%` : '', hasVal_(c.comfort) ? c.comfort : ''];
+        return `<li>${parts.filter(Boolean).map(p => escapeHtml_(p)).join('，')}</li>`;
+      }).join('');
 
       const html = `
-          <div id="hour-strip" class="overflow-x-auto no-scrollbar pb-2 rounded-2xl md:cursor-grab focus-visible:outline focus-visible:outline-2 focus-visible:outline-muji-textMutedLight/50" tabindex="0" role="region" aria-label="逐時預報，可左右捲動">
-            <div class="relative" style="width:${totalW}px">
-              <div class="absolute inset-0 grid pointer-events-none rounded-2xl overflow-hidden top-[52px] bottom-0" style="${gridCols}">${bgSegs}</div>
-              ${dividers}
-              <div class="relative flex flex-col space-y-3 pt-2 text-xs z-10">
-                <div class="grid font-bold border-b border-muji-borderLight dark:border-muji-borderDark pb-2 text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${dateRow}</div>
-                <div class="grid font-medium" style="${gridCols}">${timeRow}</div>
-                <div class="grid text-base my-1" style="${gridCols}">${wxRow}</div>
-                <div class="h-28 relative">
-                  <div class="grid absolute top-1 left-0 z-20 font-mono font-bold" style="${gridCols};width:${totalW}px">${tempLabels}</div>
-                  ${svg}
+          <div class="relative">
+            <div id="hour-strip" class="overflow-x-auto no-scrollbar pb-2 rounded-2xl md:cursor-grab" tabindex="0" role="region" aria-label="逐時預報圖表，可用方向鍵左右捲動；文字摘要在圖表之後">
+              <div class="relative" style="width:${totalW}px" aria-hidden="true">
+                <div class="absolute inset-0 grid pointer-events-none rounded-2xl overflow-hidden top-[52px] bottom-0" style="${gridCols}">${bgSegs}</div>
+                ${dividers}
+                <div class="relative flex flex-col space-y-3 pt-2 text-xs z-10">
+                  <div class="grid font-bold border-b border-muji-borderLight dark:border-muji-borderDark pb-2 text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${dateRow}</div>
+                  <div class="grid font-medium" style="${gridCols}">${timeRow}</div>
+                  <div class="grid text-base my-1" style="${gridCols}">${wxRow}</div>
+                  <div class="h-28 relative">
+                    <div class="grid absolute top-1 left-0 z-20 font-mono font-bold" style="${gridCols};width:${totalW}px">${tempLabels}</div>
+                    ${svg}
+                  </div>
+                  <div class="grid text-blue-600 dark:text-blue-400 font-medium" style="${gridCols}">${rainRow}</div>
+                  <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${rhRow}</div>
+                  <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${windRow}</div>
+                  <div class="grid text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 pb-2 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25" style="${gridCols}">${comfortRow}</div>
                 </div>
-                <div class="grid text-blue-600 dark:text-blue-400 font-medium" style="${gridCols}">${rainRow}</div>
-                <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${rhRow}</div>
-                <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${windRow}</div>
-                <div class="grid text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 pb-2 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25" style="${gridCols}">${comfortRow}</div>
               </div>
             </div>
+            <div id="hour-fade" class="pointer-events-none absolute right-0 top-0 bottom-2 w-10 rounded-r-2xl bg-gradient-to-l from-muji-cardLight dark:from-muji-cardDark to-transparent transition-opacity duration-200" aria-hidden="true"></div>
           </div>
-          ${approxNote}`;
+          <ul class="sr-only" aria-label="逐時預報文字摘要，每3小時一筆">${srItems}</ul>
+          <div class="flex items-start justify-between gap-3 mt-1 text-[10px] text-muji-textMutedLight dark:text-muji-textMutedDark">
+            <p>天氣圖示、降雨機率、風向為 3 小時預報（圖示每小時重複顯示）；溫度虛線＝僅 3 小時資料</p>
+            <span class="md:hidden shrink-0 whitespace-nowrap"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> 左右滑動</span>
+          </div>`;
       return { html, days: runs.map(r => ({ key: r.key, label: r.label, x: r.start * colw })) };
     }
 
     // ---- 逐時長條的捲動控制：日期按鈕跳轉、捲動時同步亮起日期、桌機箭頭與拖曳 ----
-    function hourScrollBehavior_() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
+    function motionBehavior_() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
     function setHourTab_(key) {
-      const tabsEl = document.getElementById('hour-day-tabs');
+      if (key === hourActiveKey_) return; // 沒變就不重畫，捲動時每幀都會呼叫
+      hourActiveKey_ = key;
+      const tabsEl = document.getElementById('hour-day-tabs'); // 已加 relative，offsetLeft 以此容器為基準
       document.querySelectorAll('.hour-day-tab').forEach(btn => {
         const on = btn.id === `hourtab-${key}`;
         btn.className = HOUR_TAB_BASE_ + (on ? HOUR_TAB_ON_ : HOUR_TAB_OFF_);
@@ -964,19 +998,27 @@ function wxIconInfo(text, isNight) {
         if (on && tabsEl && btn.offsetLeft < tabsEl.scrollLeft) tabsEl.scrollLeft = Math.max(0, btn.offsetLeft - 8);
       });
     }
+    /** 箭頭鈕用 aria-disabled（不用 disabled，免得焦點在鈕上時被丟掉） */
+    function setHourArrows_(prevOff, nextOff) {
+      const prev = document.getElementById('hour-prev'), next = document.getElementById('hour-next');
+      if (prev) prev.setAttribute('aria-disabled', String(prevOff));
+      if (next) next.setAttribute('aria-disabled', String(nextOff));
+    }
     function onHourScroll_() {
       const sc = document.getElementById('hour-strip');
-      if (!sc) return;
+      if (!sc) { setHourArrows_(true, true); return; }
       const max = sc.scrollWidth - sc.clientWidth;
-      const prev = document.getElementById('hour-prev'), next = document.getElementById('hour-next');
-      if (prev) prev.disabled = sc.scrollLeft <= 1;
-      if (next) next.disabled = sc.scrollLeft >= max - 1;
+      setHourArrows_(sc.scrollLeft <= 1, sc.scrollLeft >= max - 1);
+      const fade = document.getElementById('hour-fade'); // 右緣淡出：提示還有內容，捲到底就隱藏
+      if (fade) fade.classList.toggle('opacity-0', max <= 1 || sc.scrollLeft >= max - 1);
       if (hourPinned_ || hourDays_.length === 0) return;
       let key = hourDays_[0].key;
       for (const d of hourDays_) if (d.x <= sc.scrollLeft + 8) key = d.key;
       if (max > 1 && sc.scrollLeft >= max - 1) key = hourDays_[hourDays_.length - 1].key; // 捲到底＝最後一天
       setHourTab_(key);
     }
+    window.addEventListener('resize', onHourScroll_); // 轉向或縮放後重算箭頭與淡出
+
     function setupHourStrip_() {
       const sc = document.getElementById('hour-strip');
       if (!sc) return;
@@ -1008,20 +1050,31 @@ function wxIconInfo(text, isNight) {
       if (!sc || !d) return;
       hourPinned_ = key;
       setHourTab_(key);
-      sc.scrollTo({ left: d.target, behavior: hourScrollBehavior_() });
+      sc.scrollTo({ left: d.target, behavior: motionBehavior_() });
     }
     /** 桌機左右箭頭：每次捲動約一個畫面寬度的 3/4 */
     function scrollHourBy_(dir) {
       const sc = document.getElementById('hour-strip');
       if (!sc) return;
       hourPinned_ = null;
-      sc.scrollBy({ left: dir * Math.max(HOUR_COLW_ * 3, sc.clientWidth * 0.75), behavior: hourScrollBehavior_() });
+      sc.scrollBy({ left: dir * Math.max(HOUR_COLW_ * 3, sc.clientWidth * 0.75), behavior: motionBehavior_() });
+    }
+    /** 回到頁首：捲到最上，焦點移到標題（按鈕隱藏後焦點才不會留在看不見的地方） */
+    function scrollToTop_() {
+      document.querySelector('h1').focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: motionBehavior_() });
     }
 
     let hourSeq = 0;
     async function loadHourlyForecast() {
+      const box = document.getElementById('hour-day-panels');
+      box.setAttribute('aria-busy', 'true'); // 載入中，讀屏先不唸骨架
+      try { await loadHourlyForecastInner_(); } finally { box.removeAttribute('aria-busy'); }
+    }
+    async function loadHourlyForecastInner_() {
       const seq = ++hourSeq;
-      hourDays_ = []; hourPinned_ = null;
+      hourDays_ = []; hourPinned_ = null; hourActiveKey_ = null;
+      setHourArrows_(true, true);
       const tabsEl = document.getElementById('hour-day-tabs');
       const panelsEl = document.getElementById('hour-day-panels');
       tabsEl.innerHTML = `<div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div><div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>`;
@@ -1031,11 +1084,12 @@ function wxIconInfo(text, isNight) {
 
       if (!res.ok) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p class="text-xs text-red-600 dark:text-red-400">逐時預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">逐時預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
         return;
       }
 
       const els = res.elements;
+      hourlyLoadedKey_ = tickKey_(); // 記下這份資料是哪個整點載入的
       hourlyCache = { key: currentCounty + currentTownship, els: els };
       applyForecastNow_(els); // 今日卡片的體感/舒適度/降雨機率/預報天氣，從同一份逐時資料挑「現在」
 
@@ -1043,7 +1097,7 @@ function wxIconInfo(text, isNight) {
       const blocks = els['天氣現象'] || [];
       if (blocks.length === 0) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p class="text-xs text-red-600 dark:text-red-400">目前沒有逐時預報資料<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有逐時預報資料<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
         return;
       }
 
@@ -1103,7 +1157,7 @@ function wxIconInfo(text, isNight) {
 
       if (allCols.length === 0) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p class="text-xs text-red-600 dark:text-red-400">目前沒有可顯示的逐時預報<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有可顯示的逐時預報<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
         return;
       }
 
@@ -1177,13 +1231,13 @@ function wxIconInfo(text, isNight) {
       if (seq !== weekSeq) return;
       const retryBtn = '<button type="button" onclick="loadWeeklyForecast()" class="ml-2 underline">重試</button>';
       if (!res.ok) {
-        tableEl.innerHTML = `<span class="text-xs text-red-600 dark:text-red-400">一週預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}${retryBtn}</span>`;
+        tableEl.innerHTML = `<span role="alert" class="text-xs text-red-600 dark:text-red-400">一週預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}${retryBtn}</span>`;
         return;
       }
       const els = res.elements;
       const blocks = els['天氣現象'] || [];
       if (blocks.length === 0) {
-        tableEl.innerHTML = `<span class="text-xs text-red-600 dark:text-red-400">目前沒有週報資料${retryBtn}</span>`;
+        tableEl.innerHTML = `<span role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有週報資料${retryBtn}</span>`;
         return;
       }
       function byStart(elName, key) {
@@ -1268,6 +1322,12 @@ function radarFrameDateTime_(name, idx) {
 }
 
 let radarLoading = false;
+/** 雷達動畫該不該播：地圖分頁＋落雨小幫手可見＋頁面在前景，否則計時器白白空轉 */
+function radarShouldPlay_() {
+  const v = document.getElementById('map-rainhelper-view');
+  return currentTab === 'maps' && !document.hidden && !!v && !v.classList.contains('hidden');
+}
+
 async function loadRadarNowcast() {
   if (radarLoading) return;
   radarLoading = true;
@@ -1293,7 +1353,7 @@ async function loadRadarNowcast() {
     setRadarFrame(0);
     await getLatLng_();
     updateRadarMarker();
-    startRadar_();
+    if (radarShouldPlay_()) startRadar_();
   } finally {
     radarLoading = false;
   }
@@ -1385,6 +1445,11 @@ function switchTab(tabKey) {
 
   window.scrollTo({ top: 0 }); // 切換分頁一律回到頂端，避免停在上一頁的捲動位置
 
+  if (tabKey === 'today') {
+    hourPinned_ = null; onHourScroll_(); // 分頁隱藏時瀏覽器會把長條捲回起點，重新依位置亮起日期按鈕
+    if (hourlyLoadedKey_ && tickKey_() !== hourlyLoadedKey_) reloadTodayData_(); // 離開期間整點已過
+  }
+
   if (tabKey === 'weekly' && weeklyStale) loadWeeklyForecast();
   if (tabKey === 'maps') {
     if (!radarFrames) loadRadarNowcast();
@@ -1422,13 +1487,28 @@ async function refreshCurrentTab() {
 // 手機切到別的App再回來：離開超過10分鐘就自動更新全部資料；離開時順便停掉雷達動畫
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopRadar_(); return; }
+  if (radarShouldPlay_() && radarFrames) startRadar_(); // 回前景繼續播放
   if (Date.now() - lastRefreshAt < 10 * 60 * 1000) return;
   lastRefreshAt = Date.now();
   loadTodayWeather(); loadHourlyForecast(); loadAlerts(); loadEarthquake();
   weeklyStale = true;
   if (currentTab === 'weekly') loadWeeklyForecast();
-  if (currentTab === 'maps') loadRadarNowcast();
+  if (radarShouldPlay_()) loadRadarNowcast();
 });
+
+// 頁面開著不關（例如教室螢幕）：每10分鐘檢查，整點或日期變了就重載今日與逐時，
+// 「現在」欄、日期、農曆、日出日落才不會停在舊時間
+function reloadTodayData_() {
+  lastRefreshAt = Date.now();
+  loadTodayWeather();
+  loadHourlyForecast();
+  weeklyStale = true;
+  if (currentTab === 'weekly') loadWeeklyForecast();
+}
+setInterval(() => {
+  if (document.hidden || !hourlyLoadedKey_ || tickKey_() === hourlyLoadedKey_) return;
+  reloadTodayData_();
+}, 10 * 60 * 1000);
 
     // 2. 地圖子分頁切換
 function switchMapSubTab(subTab) {
@@ -1745,11 +1825,9 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
     window.addEventListener('scroll', () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 20) {
-        mobileBottomNav.classList.add('translate-y-full');
-      } else {
-        mobileBottomNav.classList.remove('translate-y-full');
-      }
+      const hideNav = currentScrollY > lastScrollY && currentScrollY > 20;
+      mobileBottomNav.classList.toggle('translate-y-full', hideNav);
+      mobileBottomNav.toggleAttribute('inert', hideNav); // 滑出畫面時不可聚焦
 
       lastScrollY = currentScrollY;
 
@@ -1757,6 +1835,7 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
       const showTop = currentScrollY > window.innerHeight * 0.8;
       topBtn.classList.toggle('opacity-0', !showTop);
       topBtn.classList.toggle('pointer-events-none', !showTop);
+      topBtn.toggleAttribute('inert', !showTop); // 看不見時不可聚焦、讀屏也略過
     });
 
     // 5. 主題邏輯
