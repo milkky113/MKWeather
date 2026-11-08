@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-07 #3 23:40 專家審查第一批：逐時灰字與小標、明日預報、大卡響應式、空品短標籤、特報／地震卡結構、雷達滑桿、定位流程 -->
+<!-- 版本：2026-11-08 #1 08:40 專家審查第二批：讀屏圖示、圖示加深、熱區與標籤、特報／地震細節、雷達刻度與區域、標題 h2、天氣判斷順序 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -127,10 +127,10 @@
         
         <!-- 天氣特報 Alert Banner（無警報自動隱藏；收合時顯示最高優先權那則，展開看完整清單；左側邊線顏色隨最高等級變化） -->
 <div id="alert-card" class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark border-l-4 border-l-muji-borderLight dark:border-l-muji-borderDark rounded-3xl p-5 shadow-sm hidden">
-  <h3 class="text-sm font-bold tracking-wide"><button type="button" onclick="toggleAlertList()" id="alert-toggle" aria-expanded="false" aria-controls="alert-list" class="w-full flex items-center justify-between text-left">
+  <h2 class="text-sm font-bold tracking-wide"><button type="button" onclick="toggleAlertList()" id="alert-toggle" aria-expanded="false" aria-controls="alert-list" class="w-full flex items-center justify-between text-left">
     <span class="text-sm font-bold tracking-wide flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-xs" aria-hidden="true"></i> 天氣特報</span>
     <span class="flex items-center gap-1.5 text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="alert-count-text"></span> <i id="alert-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
-  </button></h3>
+  </button></h2>
   <div id="alert-top" role="status" class="mt-3 text-sm"></div>
   <div id="alert-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-sm space-y-1"></div>
 </div>
@@ -157,7 +157,7 @@
                 </div>
               </div>
               <p id="obs-source" class="whitespace-nowrap truncate text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="obs-station-text"></span><span id="aqi-station-text"></span></p>
-              <p id="today-retry" role="alert" class="hidden text-xs text-red-600 dark:text-red-400">載入失敗 <button type="button" onclick="loadTodayWeather()" class="underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button></p>
+              <p id="today-retry" role="alert" class="hidden text-xs text-red-600 dark:text-red-400">載入失敗 <button type="button" onclick="loadTodayWeather()" class="inline-flex items-center justify-center w-10 h-10 -my-3 align-middle" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button></p>
             </div>
 
             <!-- 天氣現象圖示框：高度與左欄等高（日期上緣～測站下緣），圖示隨現在天氣變換；文字移到氣溫旁 -->
@@ -188,7 +188,7 @@
               <span id="val-aqi" class="flex items-end gap-1"><span id="val-aqi-num" class="text-xl font-light leading-none">--</span><span id="val-aqi-status" class="text-[11px] sm:text-xs font-normal leading-tight min-w-0"></span></span>
             </div>
                         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
-              <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-sun text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 紫外線指數</span>
+              <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-sun text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 紫外線</span>
               <span id="val-uv" class="text-xl font-light">-- <span id="val-uv-status" class="text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"></span></span>
             </div>
             <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
@@ -206,9 +206,9 @@
         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-6 shadow-sm min-w-0">
           <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div class="flex items-center justify-between w-full md:w-auto gap-3">
-              <h3 class="text-sm font-bold tracking-wide flex items-center gap-2">
+              <h2 class="text-sm font-bold tracking-wide flex items-center gap-2">
                 <i class="fa-solid fa-clock text-xs" aria-hidden="true"></i> 逐時預報
-              </h3>
+              </h2>
               <i class="fa-solid fa-arrows-left-right text-xs shrink-0 md:hidden text-muji-textMutedLight dark:text-muji-textMutedDark" role="img" aria-label="可左右滑動" title="可左右滑動"></i>
             </div>
             <div class="flex items-center gap-3 min-w-0 max-w-full">
@@ -234,10 +234,10 @@
 
         <!-- 近期地震資訊卡 (CWA E-A0015 可折疊；卡片本身中性色，只有規模/震度徽章上色) -->
 <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-5 shadow-sm hidden border-l-4 border-l-muji-borderLight dark:border-l-muji-borderDark" id="earthquake-card">
-  <h3 class="text-sm font-bold tracking-wide"><button type="button" onclick="toggleEarthquakeList()" id="eq-toggle" aria-expanded="false" aria-controls="earthquake-list" class="w-full flex items-center justify-between text-left">
-    <span class="flex items-center gap-2"><i class="fa-solid fa-house-crack text-xs text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 地震報告</span>
+  <h2 class="text-sm font-bold tracking-wide"><button type="button" onclick="toggleEarthquakeList()" id="eq-toggle" aria-expanded="false" aria-controls="earthquake-list" class="w-full flex items-center justify-between text-left">
+    <span class="flex items-center gap-2"><i class="fa-solid fa-house-crack text-xs text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 地震報告 <span id="eq-count" class="text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"></span></span>
     <span class="flex items-center gap-1.5 text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"><i id="eq-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
-  </button></h3>
+  </button></h2>
   <div id="eq-latest" class="mt-3 text-sm"></div>
   <div id="earthquake-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-sm space-y-1"></div>
 </div>
@@ -249,9 +249,9 @@
         <!-- 一週預報：白天／晚上共用同一個橫向捲動容器，滑動同步，內容由JS依F-D0047週報API動態渲染 -->
         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-6 shadow-sm min-w-0">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold tracking-wide flex items-center gap-2">
+            <h2 class="text-sm font-bold tracking-wide flex items-center gap-2">
               <i class="fa-solid fa-calendar-days text-xs" aria-hidden="true"></i> 一週預報
-            </h3>
+            </h2>
             <i class="fa-solid fa-arrows-left-right text-xs shrink-0 text-muji-textMutedLight dark:text-muji-textMutedDark" role="img" aria-label="可左右滑動" title="可左右滑動"></i>
           </div>
 
@@ -287,17 +287,17 @@
         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-3 shadow-sm min-h-[560px]">
 <div id="map-rainhelper-view" class="w-full flex flex-col gap-3 p-3" style="height:max(300px,calc(100vh - 260px));height:max(300px,calc(100dvh - 260px))">
   <div class="relative w-full flex-1 min-h-0">
-  <div id="radar-scroll" onscroll="updateRadarFade_()" class="w-full h-full overflow-x-auto no-scrollbar rounded-2xl bg-slate-900 flex items-center">
+  <div id="radar-scroll" onscroll="updateRadarFade_()" tabindex="0" role="region" aria-label="雷達回波圖，可左右捲動" class="w-full h-full overflow-x-auto no-scrollbar rounded-2xl bg-slate-900 flex items-center">
     <div id="radar-img-box" class="relative h-full mx-auto shrink-0" style="aspect-ratio:2512/1927">
       <img id="radar-frame-img" class="w-full h-full object-fill hidden" alt="雷達回波預估">
       <div id="radar-location-marker" class="absolute hidden flex-col items-center pointer-events-none" style="transform:translate(-50%,-100%)">
         <i class="fa-solid fa-location-dot text-red-500 text-lg drop-shadow-lg" aria-hidden="true"></i>
       </div>
-      <span id="radar-loading-text" class="absolute inset-0 flex items-center justify-center text-xs text-white/60">載入中…</span>
+      <span id="radar-loading-text" role="status" class="absolute inset-0 flex items-center justify-center text-xs text-white/60">載入中…</span>
     </div>
   </div>
   <div id="radar-fade" class="hidden absolute top-0 right-0 bottom-0 w-10 rounded-r-2xl bg-gradient-to-l from-black/40 to-transparent pointer-events-none" aria-hidden="true"></div>
-  <a href="https://watch.ncdr.nat.gov.tw/appv2/" target="_blank" rel="noopener" aria-label="開啟官方頁面" title="開啟官方頁面" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+  <a href="https://watch.ncdr.nat.gov.tw/appv2/" target="_blank" rel="noopener" aria-label="開啟 NCDR 官方雷達頁（另開新分頁）" title="開啟 NCDR 官方雷達頁（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
 </div>
   <div class="flex items-center gap-3 w-full">
     <button type="button" onclick="toggleRadarPlay()" id="radar-play-btn" aria-label="播放雷達回波動畫" class="w-9 h-9 rounded-full bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark flex items-center justify-center shrink-0">
@@ -305,9 +305,7 @@
     </button>
     <div class="flex-1">
       <input type="range" id="radar-slider" aria-label="雷達回波時間軸" min="0" max="6" value="0" step="1" class="w-full" oninput="stopRadar_(); setRadarFrame(this.value)">
-      <div class="flex justify-between text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark px-0.5" aria-hidden="true">
-        <span>0分</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60分</span>
-      </div>
+      <div class="relative h-4 mx-2 text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark" aria-hidden="true"><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:0.000%">0分</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:16.667%">10</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:33.333%">20</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:50.000%">30</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:66.667%">40</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:83.333%">50</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:100.000%">60分</span></div>
     </div>
       </div>
   <div class="flex items-center justify-between">
@@ -318,12 +316,12 @@
 
           <div id="map-aqimap-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
             <iframe src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" loading="lazy" title="空品地圖"></iframe>
-            <a href="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" target="_blank" rel="noopener" aria-label="開啟官方頁面" title="開啟官方頁面" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            <a href="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" target="_blank" rel="noopener" aria-label="開啟空品地圖官方頁面（另開新分頁）" title="開啟空品地圖官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
           </div>
 
           <div id="map-airbox-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
             <iframe src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" loading="lazy" title="空氣盒子"></iframe>
-            <a href="https://airbox.edimaxcloud.com/" target="_blank" rel="noopener" aria-label="開啟官方頁面" title="開啟官方頁面" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            <a href="https://airbox.edimaxcloud.com/" target="_blank" rel="noopener" aria-label="開啟空氣盒子官方頁面（另開新分頁）" title="開啟空氣盒子官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
           </div>
         </div>
 
@@ -404,7 +402,7 @@
       <h2 id="eqd-title" class="text-base font-bold">--</h2>
       <button onclick="closeEarthquakeDetail()" aria-label="關閉地震詳情" class="text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
     </div>
-    <div id="eqd-body" class="text-xs space-y-2"></div>
+    <div id="eqd-body" class="text-sm space-y-2"></div>
   </div>
 </div>
 
@@ -414,7 +412,7 @@
       <h2 id="ad-title" class="text-base font-bold">--</h2>
       <button onclick="closeAlertDetail()" aria-label="關閉特報詳情" class="text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
     </div>
-    <div id="ad-body" class="text-xs space-y-2"></div>
+    <div id="ad-body" class="text-sm space-y-2"></div>
   </div>
 </div>
 
@@ -682,16 +680,17 @@
 
 // 天氣現象文字 → icon+顏色 對照（沿用逐時預報/週預報既有色票，全站配色一致）
 function wxIconInfo(text, isNight) {
-  if (!text) return { icon: 'fa-cloud', color: 'text-gray-400' };
+  if (!text) return { icon: 'fa-cloud', color: 'text-gray-500' };
   if (/雷/.test(text)) return { icon: 'fa-cloud-bolt', color: 'text-violet-400' };
   if (/豪雨|大雨|暴雨/.test(text)) return { icon: 'fa-cloud-showers-heavy', color: 'text-blue-500' };
   if (/陣雨|雨/.test(text)) return { icon: 'fa-cloud-rain', color: 'text-blue-400' };
   if (/雪/.test(text)) return { icon: 'fa-snowflake', color: 'text-slate-300' };
-  if (/霧|靄|霾/.test(text)) return { icon: 'fa-smog', color: 'text-gray-400' };
-  if (/多雲/.test(text)) return isNight ? { icon: 'fa-cloud-moon', color: 'text-indigo-300' } : { icon: 'fa-cloud-sun', color: 'text-amber-500' };
-  if (/陰/.test(text)) return { icon: 'fa-cloud', color: 'text-gray-400' };
-  if (/晴/.test(text)) return isNight ? { icon: 'fa-moon', color: 'text-indigo-300' } : { icon: 'fa-sun', color: 'text-amber-500' };
-  return { icon: 'fa-cloud', color: 'text-gray-400' };
+  if (/霧|靄|霾/.test(text)) return { icon: 'fa-smog', color: 'text-gray-500' };
+  if (/^陰/.test(text)) return { icon: 'fa-cloud', color: 'text-gray-500' }; // 「陰時多雲」以陰為主，要排在多雲之前
+  if (/多雲/.test(text)) return isNight ? { icon: 'fa-cloud-moon', color: 'text-indigo-300' } : { icon: 'fa-cloud-sun', color: 'text-amber-600' };
+  if (/陰/.test(text)) return { icon: 'fa-cloud', color: 'text-gray-500' };
+  if (/晴/.test(text)) return isNight ? { icon: 'fa-moon', color: 'text-indigo-300' } : { icon: 'fa-sun', color: 'text-amber-600' };
+  return { icon: 'fa-cloud', color: 'text-gray-500' };
 }
 
     // 目前地點的經緯度（日出日落計算、雷達標記共用）
@@ -778,7 +777,7 @@ function wxIconInfo(text, isNight) {
     const AQI_STALE_MS_ = 3 * 3600000;     // 空品發布超過 3 小時視為較舊
     let lastObsWeather_ = null, lastFcWeather_ = null, obsStale_ = false;
     /** 現在天氣文字：優先用觀測；觀測缺值才用預報天氣（文字不加註） */
-    function nowWx_() { return hasVal_(lastObsWeather_) ? lastObsWeather_ : hasVal_(lastFcWeather_) ? lastFcWeather_ : null; }
+    function nowWx_() { if (obsStale_ && hasVal_(lastFcWeather_)) return lastFcWeather_; return hasVal_(lastObsWeather_) ? lastObsWeather_ : hasVal_(lastFcWeather_) ? lastFcWeather_ : null; }
     function refreshWxNow_() {
       const w = nowWx_();
       setText_('val-wx-now', w === null ? '--' : w);
@@ -955,7 +954,7 @@ function wxIconInfo(text, isNight) {
     }
     function wxSpan_(text, isNight, wrapCls, muted) {
       const { icon, color } = wxIconInfo(text, isNight);
-      return `<div class="${wrapCls || ''} text-center ${muted ? 'text-muji-textMutedLight dark:text-muji-textMutedDark' : color} py-1"><i class="fa-solid ${icon}" aria-hidden="true"></i></div>`;
+      return `<div role="img" aria-label="${escapeHtml_(hasVal_(text) ? text : '天氣未提供')}" class="${wrapCls || ''} text-center ${muted ? 'text-muji-textMutedLight dark:text-muji-textMutedDark' : color} py-1"><i class="fa-solid ${icon}" aria-hidden="true"></i></div>`;
     }
     function comfortSpan_(text, wrapCls) {
       return `<div class="${wrapCls || ''} text-center py-1">${hasVal_(text) ? escapeHtml_(text) : '--'}</div>`;
@@ -993,9 +992,9 @@ function wxIconInfo(text, isNight) {
 
       // 日夜底色：連續同一時段合併（凌晨→白天→傍晚夜間）
       const SEG_CLS = {
-        m: 'bg-gradient-to-b from-indigo-900/15 to-indigo-900/5 dark:from-indigo-950/40 dark:to-indigo-950/15',
+        m: 'bg-gradient-to-b from-indigo-900/10 to-indigo-900/5 dark:from-indigo-950/40 dark:to-indigo-950/15',
         d: 'bg-amber-500/5',
-        e: 'bg-gradient-to-b from-indigo-900/5 to-indigo-900/15 dark:from-indigo-950/15 dark:to-indigo-950/40'
+        e: 'bg-gradient-to-b from-indigo-900/5 to-indigo-900/10 dark:from-indigo-950/15 dark:to-indigo-950/40'
       };
       const segs = [];
       cols.forEach(c => {
@@ -1186,7 +1185,7 @@ function wxIconInfo(text, isNight) {
 
       if (!res.ok) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">逐時預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">逐時預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline px-2 py-2 -my-2">重試</button></p>`;
         return;
       }
 
@@ -1199,7 +1198,7 @@ function wxIconInfo(text, isNight) {
       const blocks = els['天氣現象'] || [];
       if (blocks.length === 0) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有逐時預報資料<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有逐時預報資料<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline px-2 py-2 -my-2">重試</button></p>`;
         return;
       }
 
@@ -1260,7 +1259,7 @@ function wxIconInfo(text, isNight) {
 
       if (allCols.length === 0) {
         tabsEl.innerHTML = '';
-        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有可顯示的逐時預報<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline">重試</button></p>`;
+        panelsEl.innerHTML = `<p role="alert" class="text-xs text-red-600 dark:text-red-400">目前沒有可顯示的逐時預報<button type="button" onclick="loadHourlyForecast()" class="ml-2 underline px-2 py-2 -my-2">重試</button></p>`;
         return;
       }
 
@@ -1353,7 +1352,7 @@ function wxIconInfo(text, isNight) {
       tableEl.innerHTML = `<div class="animate-pulse space-y-3"><div class="h-4 w-full bg-muji-borderLight dark:bg-muji-borderDark rounded"></div><div class="h-32 w-full bg-muji-borderLight dark:bg-muji-borderDark rounded-2xl"></div><div class="h-32 w-full bg-muji-borderLight dark:bg-muji-borderDark rounded-2xl"></div></div>`;
       const res = await fetchWeekly_();
       if (seq !== weekSeq) return;
-      const retryBtn = '<button type="button" onclick="loadWeeklyForecast()" class="ml-2 underline">重試</button>';
+      const retryBtn = '<button type="button" onclick="loadWeeklyForecast()" class="ml-2 underline px-2 py-2 -my-2">重試</button>';
       if (!res.ok) {
         tableEl.innerHTML = `<span role="alert" class="text-xs text-red-600 dark:text-red-400">一週預報載入失敗：${escapeHtml_(res.error || '未知錯誤')}${retryBtn}</span>`;
         return;
@@ -1467,7 +1466,7 @@ async function loadRadarNowcast() {
         loadingText.classList.add('hidden'); // 短時間內重複點擊，畫面已有資料可看，靜默略過不顯示錯誤
         return;
       }
-      loadingText.innerHTML = `${escapeHtml_(res.error) || '雷達回波載入失敗'}<button type="button" onclick="loadRadarNowcast()" class="ml-2 underline">重試</button>`;
+      loadingText.innerHTML = `${escapeHtml_(res.error) || '雷達回波載入失敗'}<button type="button" onclick="loadRadarNowcast()" class="ml-2 underline px-2 py-2 -my-2">重試</button>`;
       return;
     }
     stopRadar_(); // 重新載入時先停掉舊的動畫計時器，避免疊加或誤判成「按暫停」
@@ -1491,6 +1490,7 @@ function setRadarFrame(i) {
   document.getElementById('radar-slider').value = i;
   const label = radarFrameDateTime_(radarFrames[i].name, i);
   document.getElementById('radar-time-label').textContent = label;
+  document.getElementById('radar-frame-img').alt = `雷達回波預估 ${label}`;
   document.getElementById('radar-slider').setAttribute('aria-valuetext', `${label}（未來 ${Number(i) * 10} 分鐘）`);
 }
 
@@ -1745,6 +1745,7 @@ function setAlertBorder_(list) {
   [...Object.values(ALERT_BORDER_CLS_), ...ALERT_BORDER_NEUTRAL_].forEach(c => card.classList.remove(c));
   let best = null;
   (list || []).forEach(a => { if ((ALERT_RANK_[a.color] || 0) > (ALERT_RANK_[best] || 0)) best = a.color; });
+  if (!best && (list || []).some(a => a.type === '颱風')) best = '橙色';
   if (best) card.classList.add(ALERT_BORDER_CLS_[best]); else ALERT_BORDER_NEUTRAL_.forEach(c => card.classList.add(c));
 }
 
@@ -1753,7 +1754,8 @@ let alertSeq = 0;
 
 function alertBadgeHtml_(a) {
   const lv = a.color ? '・' + String(a.color).replace('色', '') : ''; // 等級併進膠囊，例如「大雨・黃」；沒有等級的只顯示名稱，固定寬度讓標題對齊
-  return `<span class="shrink-0 w-[5.5rem] text-center py-0.5 rounded-md text-[11px] font-bold ${alertColorCls_(a.color)}">${escapeHtml_(a.type)}${escapeHtml_(lv)}</span>`;
+  const cls = !a.color && a.type === '颱風' ? ALERT_COLOR_MAP_['橙色'] : alertColorCls_(a.color); // 颱風沒有等級顏色時固定橘色
+  return `<span class="shrink-0 w-[5.5rem] text-center py-0.5 rounded-md text-[11px] font-bold ${cls}">${escapeHtml_(a.type)}${escapeHtml_(lv)}</span>`;
 }
 
 /** 特報卡顯示一段提示文字（例如載入失敗），不要讓使用者誤以為「沒有特報」 */
@@ -1774,13 +1776,13 @@ async function loadAlerts() {
   const res = await fetchGas('alerts', { county: currentCounty });
   if (seq !== alertSeq) return;
   if (!res.ok) {
-    showAlertNotice_(`<span class="text-muji-textMutedLight dark:text-muji-textMutedDark">特報暫時無法取得</span><button type="button" onclick="loadAlerts()" class="ml-2 underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`);
+    showAlertNotice_(`<span class="text-muji-textMutedLight dark:text-muji-textMutedDark">特報暫時無法取得</span><button type="button" onclick="loadAlerts()" class="ml-2 underline px-2 py-2 -my-2" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`);
     return;
   }
   const list = (res.alerts || []).slice().sort((a, b) => alertPriorityRank_(a.type) - alertPriorityRank_(b.type));
   const partialNote = res.partial ? '<p class="mt-2 text-muji-textMutedLight dark:text-muji-textMutedDark">※部分來源暫缺</p>' : '';
   if (list.length === 0) {
-    if (res.partial) showAlertNotice_(`<span class="text-muji-textMutedLight dark:text-muji-textMutedDark">部分來源暫缺，無法確認有無特報</span><button type="button" onclick="loadAlerts()" class="ml-2 underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`);
+    if (res.partial) showAlertNotice_(`<span class="text-muji-textMutedLight dark:text-muji-textMutedDark">部分來源暫缺，無法確認有無特報</span><button type="button" onclick="loadAlerts()" class="ml-2 underline px-2 py-2 -my-2" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`);
     else { document.getElementById('alert-card').classList.add('hidden'); currentAlertsData = null; }
     return;
   }
@@ -1788,12 +1790,13 @@ async function loadAlerts() {
   document.getElementById('alert-card').classList.remove('hidden');
   setAlertBorder_(list);
   setText_('alert-count-text', `${list.length}則`);
-  document.getElementById('alert-chevron').classList.remove('hidden');
+  document.getElementById('alert-chevron').classList.toggle('hidden', list.length < 2); // 只有 1 則時沒有清單可展開，隱藏展開箭頭
+  document.getElementById('alert-toggle').disabled = list.length < 2;
   // 收合時：只顯示最高優先權的那一則（含等級文字）；展開才看完整清單
   const top = list[0];
   const topEl = document.getElementById('alert-top');
   topEl.classList.remove('hidden');
-  topEl.innerHTML = `<button type="button" onclick="openAlertDetail(0)" class="w-full flex items-center gap-2 text-left">${alertBadgeHtml_(top)}<span class="flex-1 min-w-0 truncate">${escapeHtml_(top.headline)}</span></button>${partialNote}`;
+  topEl.innerHTML = `<button type="button" onclick="openAlertDetail(0)" aria-haspopup="dialog" class="w-full flex items-center gap-2 text-left">${alertBadgeHtml_(top)}<span class="flex-1 min-w-0 truncate">${escapeHtml_(top.headline)}</span></button>${partialNote}`;
   renderAlertList();
   // 重新載入後維持收合狀態
   document.getElementById('alert-list').classList.add('hidden');
@@ -1803,14 +1806,14 @@ async function loadAlerts() {
 
 function renderAlertList() {
   document.getElementById('alert-list').innerHTML = currentAlertsData.map((a, i) => `
-    <button type="button" onclick="openAlertDetail(${i})" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
+    <button type="button" onclick="openAlertDetail(${i})" aria-haspopup="dialog" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
       ${alertBadgeHtml_(a)}
       <span class="flex-1 min-w-0 truncate">${escapeHtml_(a.headline)}</span>
     </button>`).join('');
 }
 
 function toggleAlertList() {
-  if (!currentAlertsData || currentAlertsData.length === 0) return; // 只有提示文字時沒有清單可展開
+  if (!currentAlertsData || currentAlertsData.length < 2) return; // 沒有或只有 1 則時沒有清單可展開
   const list = document.getElementById('alert-list');
   const open = list.classList.toggle('hidden') === false;
   document.getElementById('alert-top').classList.toggle('hidden', open);
@@ -1932,9 +1935,9 @@ function setEqBorder_(intensity, originTime) {
 function renderEarthquakeList() {
   const row = (eq, i) => {
     const mi = maxIntensity_(eq.areas);
-    return `<button type="button" onclick="openEarthquakeDetail(${i})" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
-      <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-[11px] font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
-      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[11px] font-bold ${intensityBadgeCls_(mi)}">${escapeHtml_(mi)}</span>
+    return `<button type="button" onclick="openEarthquakeDetail(${i})" aria-haspopup="dialog" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
+      <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-[11px] font-bold ${MAGNITUDE_BADGE_CLS_}"><span class="sr-only">規模 </span>M${escapeHtml_(eq.magnitude)}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[11px] font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">最大震度 </span>${escapeHtml_(mi)}</span>
       <span class="flex-1 min-w-0 truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
       <span class="text-muji-textMutedLight dark:text-muji-textMutedDark shrink-0 text-right leading-tight text-xs">
         <span class="block">${escapeHtml_(relativeTime_(eq.originTime))}</span>
@@ -1943,6 +1946,7 @@ function renderEarthquakeList() {
     </button>`;
   };
   // 收合時只顯示最新一筆；展開後顯示完整清單（最新一筆在清單內，所以展開時隱藏摘要）
+  setText_('eq-count', `近 ${latestEarthquakeData.length} 筆`);
   document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0);
   setEqBorder_(maxIntensity_(latestEarthquakeData[0].areas), latestEarthquakeData[0].originTime);
   document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map(row).join('');
@@ -2046,7 +2050,7 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
     async function loadTownships() {
       const res = await fetchGas('townships', {});
       if (!res.ok) {
-        document.getElementById('location-status').innerHTML = `清單載入失敗<button type="button" onclick="loadTownships()" class="ml-2 underline" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`;
+        document.getElementById('location-status').innerHTML = `清單載入失敗<button type="button" onclick="loadTownships()" class="ml-2 underline px-2 py-2 -my-2" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>`;
         return;
       }
       townshipsData = res.townships;
