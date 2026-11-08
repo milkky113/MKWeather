@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-08 #1 08:40 專家審查第二批：讀屏圖示、圖示加深、熱區與標籤、特報／地震細節、雷達刻度與區域、標題 h2、天氣判斷順序 -->
+<!-- 版本：2026-11-08 #2 12:10 明日預報加降雨機率、地震色條依所在縣市、字級簡化三級、iframe 延後載入、preconnect -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -8,8 +8,9 @@
   <!-- 先套用深色模式再載入其他資源，避免深色使用者看到白屏閃一下；preconnect提早建立外部連線 -->
   <script>try{if(localStorage.getItem('muji_theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}</script>
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin> <!-- 字型檔是 CORS 請求，要另開一條 crossorigin 連線 -->
+  <link rel="preconnect" href="https://script.google.com" crossorigin> <!-- API 以 fetch（CORS）呼叫 -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -90,7 +91,7 @@
           <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark flex items-center gap-2">
             <button type="button" onclick="toggleLocationModal(true)" id="header-location-btn" aria-label="變更地點" class="hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-colors"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="header-location-text">台中市東區</span></button>
             <span class="opacity-40">|</span>
-            <span><i class="fa-solid fa-clock text-[11px]" aria-hidden="true"></i> 觀測於 <span id="header-obstime">--:--</span></span>
+            <span><i class="fa-solid fa-clock text-xs" aria-hidden="true"></i> 觀測於 <span id="header-obstime">--:--</span></span>
           </p>
         </div>
       </div>
@@ -156,7 +157,7 @@
                   <p class="flex flex-wrap items-baseline gap-x-1.5 text-xs text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="val-at">體感 --°C</span><span id="val-comfort">載入中</span></p>
                 </div>
               </div>
-              <p id="obs-source" class="whitespace-nowrap truncate text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="obs-station-text"></span><span id="aqi-station-text"></span></p>
+              <p id="obs-source" class="whitespace-nowrap truncate text-xs text-muji-textMutedLight dark:text-muji-textMutedDark"><span id="obs-station-text"></span><span id="aqi-station-text"></span></p>
               <p id="today-retry" role="alert" class="hidden text-xs text-red-600 dark:text-red-400">載入失敗 <button type="button" onclick="loadTodayWeather()" class="inline-flex items-center justify-center w-10 h-10 -my-3 align-middle" aria-label="重試"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button></p>
             </div>
 
@@ -179,13 +180,14 @@
             <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
               <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-calendar-day text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 明日預報</span>
               <span class="text-xs font-light flex flex-col gap-0.5 whitespace-nowrap">
-                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark">日</span><i id="tm-day-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-day-temp">--</span></span><span id="tm-day-sr" class="sr-only"></span></span>
-                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark">夜</span><i id="tm-night-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-night-temp">--</span></span><span id="tm-night-sr" class="sr-only"></span></span>
+                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">日</span><i id="tm-day-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-day-temp">--</span></span><span id="tm-day-sr" class="sr-only"></span></span>
+                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">夜</span><i id="tm-night-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-night-temp">--</span></span><span id="tm-night-sr" class="sr-only"></span></span>
+                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark"><i class="fa-solid fa-umbrella"></i></span><span id="tm-pop">--</span></span><span id="tm-pop-sr" class="sr-only"></span></span>
               </span>
             </div>
             <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
               <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-leaf text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 空氣品質</span>
-              <span id="val-aqi" class="flex items-end gap-1"><span id="val-aqi-num" class="text-xl font-light leading-none">--</span><span id="val-aqi-status" class="text-[11px] sm:text-xs font-normal leading-tight min-w-0"></span></span>
+              <span id="val-aqi" class="flex items-end gap-1"><span id="val-aqi-num" class="text-xl font-light leading-none">--</span><span id="val-aqi-status" class="text-xs font-normal leading-tight min-w-0"></span></span>
             </div>
                         <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
               <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-sun text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 紫外線</span>
@@ -239,6 +241,7 @@
     <span class="flex items-center gap-1.5 text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"><i id="eq-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
   </button></h2>
   <div id="eq-latest" class="mt-3 text-sm"></div>
+  <span id="eq-local-sr" class="sr-only"></span>
   <div id="earthquake-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-sm space-y-1"></div>
 </div>
       </div>
@@ -305,22 +308,22 @@
     </button>
     <div class="flex-1">
       <input type="range" id="radar-slider" aria-label="雷達回波時間軸" min="0" max="6" value="0" step="1" class="w-full" oninput="stopRadar_(); setRadarFrame(this.value)">
-      <div class="relative h-4 mx-2 text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark" aria-hidden="true"><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:0.000%">0分</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:16.667%">10</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:33.333%">20</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:50.000%">30</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:66.667%">40</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:83.333%">50</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:100.000%">60分</span></div>
+      <div class="relative h-4 mx-2 text-xs text-muji-textMutedLight dark:text-muji-textMutedDark" aria-hidden="true"><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:0.000%">0分</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:16.667%">10</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:33.333%">20</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:50.000%">30</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:66.667%">40</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:83.333%">50</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:100.000%">60分</span></div>
     </div>
       </div>
   <div class="flex items-center justify-between">
-    <p class="text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark">未來60分鐘回波</p>
-    <span id="radar-time-label" class="text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark tabular-nums">--</span>
+    <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">未來60分鐘回波</p>
+    <span id="radar-time-label" class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark tabular-nums">--</span>
   </div>
 </div>
 
           <div id="map-aqimap-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
-            <iframe src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" loading="lazy" title="空品地圖"></iframe>
+            <iframe data-src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" title="空品地圖"></iframe>
             <a href="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" target="_blank" rel="noopener" aria-label="開啟空品地圖官方頁面（另開新分頁）" title="開啟空品地圖官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
           </div>
 
           <div id="map-airbox-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
-            <iframe src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" loading="lazy" title="空氣盒子"></iframe>
+            <iframe data-src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" title="空氣盒子"></iframe>
             <a href="https://airbox.edimaxcloud.com/" target="_blank" rel="noopener" aria-label="開啟空氣盒子官方頁面（另開新分頁）" title="開啟空氣盒子官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
           </div>
         </div>
@@ -329,7 +332,7 @@
 
     </main>
 
-    <footer class="w-full mt-8 text-center text-[11px] leading-relaxed text-muji-textMutedLight dark:text-muji-textMutedDark space-y-1">
+    <footer class="w-full mt-8 text-center text-xs leading-relaxed text-muji-textMutedLight dark:text-muji-textMutedDark space-y-1">
       <p>資料：氣象署、環境部、NCDR｜非官方，請以官方發布為準</p>
     </footer>
   </div>
@@ -338,15 +341,15 @@
   <div id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 bg-muji-cardLight dark:bg-muji-cardDark border-t border-muji-borderLight dark:border-muji-borderDark px-3 py-2 z-40 flex items-center justify-around shadow-lg transition-transform duration-300 transform translate-y-0">
     <button onclick="switchTab('today')" id="tab-today-mobile" class="nav-tab-mobile flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-muji-textPrimaryLight dark:text-muji-textPrimaryDark">
       <i class="fa-solid fa-sun text-base" aria-hidden="true"></i>
-      <span class="text-[11px] font-medium">今日天氣</span>
+      <span class="text-xs font-medium">今日天氣</span>
     </button>
     <button onclick="switchTab('weekly')" id="tab-weekly-mobile" class="nav-tab-mobile flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-muji-textMutedLight dark:text-muji-textMutedDark">
       <i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i>
-      <span class="text-[11px] font-medium">一週趨勢</span>
+      <span class="text-xs font-medium">一週趨勢</span>
     </button>
     <button onclick="switchTab('maps')" id="tab-maps-mobile" class="nav-tab-mobile flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-muji-textMutedLight dark:text-muji-textMutedDark">
       <i class="fa-solid fa-map-location-dot text-base" aria-hidden="true"></i>
-      <span class="text-[11px] font-medium">即時地圖</span>
+      <span class="text-xs font-medium">即時地圖</span>
     </button>
   </div>
 
@@ -739,6 +742,7 @@ function wxIconInfo(text, isNight) {
       document.getElementById('header-obstime').classList.remove('text-amber-700', 'dark:text-amber-400');
       setText_('val-pop', '--%');
       setText_('val-rh', '--%');
+      setText_('tm-pop', '--'); setText_('tm-pop-sr', '');
       ['day', 'night'].forEach(k => {
         setText_(`tm-${k}-temp`, '--'); setText_(`tm-${k}-sr`, '');
         document.getElementById(`tm-${k}-icon`).className = 'fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark';
@@ -808,7 +812,7 @@ function wxIconInfo(text, isNight) {
       if (t.stationName) {
         const nm = escapeHtml_(t.stationName);
         const far = parseFloat(t.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(t.distanceKm)} km）` : '';
-        document.getElementById('obs-station-text').innerHTML = '觀測 ' + (obsStale_ ? `<span class="text-amber-700 dark:text-amber-400" title="觀測資料較舊"><i class="fa-solid fa-clock-rotate-left text-[11px]" aria-hidden="true"></i> ${nm}<span class="sr-only">（較舊）</span></span>` : nm) + far;
+        document.getElementById('obs-station-text').innerHTML = '觀測 ' + (obsStale_ ? `<span class="text-amber-700 dark:text-amber-400" title="觀測資料較舊"><i class="fa-solid fa-clock-rotate-left text-xs" aria-hidden="true"></i> ${nm}<span class="sr-only">（較舊）</span></span>` : nm) + far;
       }
     }
 
@@ -824,9 +828,12 @@ function wxIconInfo(text, isNight) {
         const p = parseCwaTime_(e.startTime);
         return p && `${pad2(p.mo)}${pad2(p.d)}` === key && (p.h >= 6 && p.h < 18) === isDay;
       });
+      const pops = {};
       [['day', true], ['night', false]].forEach(([k, isDay]) => {
         const wx = pick('天氣現象', isDay), hi = pick('最高溫度', isDay), lo = pick('最低溫度', isDay);
         const hiV = hi && hi.value.MaxTemperature, loV = lo && lo.value.MinTemperature;
+        const pp = pick('12小時降雨機率', isDay), pv = pp && pp.value.ProbabilityOfPrecipitation;
+        pops[k] = hasVal_(pv) ? pv + '%' : '--';
         const wxt = wx && wx.value.Weather, okT = hasVal_(hiV) && hasVal_(loV);
         setText_(`tm-${k}-temp`, okT ? `${loV}°–${hiV}°` : '--');
         const iconEl = document.getElementById(`tm-${k}-icon`);
@@ -834,6 +841,8 @@ function wxIconInfo(text, isNight) {
         else iconEl.className = 'fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark';
         setText_(`tm-${k}-sr`, `${isDay ? '白天' : '晚上'}，${hasVal_(wxt) ? wxt : '天氣未提供'}，${okT ? `${loV} 到 ${hiV} 度` : '溫度未提供'}`);
       });
+      setText_('tm-pop', `${pops.day}／${pops.night}`); // 左白天、右晚上，順序與上面兩行相同
+      setText_('tm-pop-sr', `降雨機率，白天 ${pops.day}，晚上 ${pops.night}`);
     }
     function renderAqi_(a) {
       const bad = aqiInvalid_(a);
@@ -847,10 +856,10 @@ function wxIconInfo(text, isNight) {
       if (lv.full && lv.full !== lv.label) statusEl.innerHTML = `<span aria-hidden="true">${lv.label}</span><span class="sr-only">${lv.full}</span>`;
       else statusEl.textContent = lv.label;
       statusEl.title = lv.full || lv.label;
-      statusEl.className = `text-[11px] sm:text-xs font-normal leading-tight min-w-0 ${lv.cls}`;
+      statusEl.className = `text-xs font-normal leading-tight min-w-0 ${lv.cls}`;
       const st = document.getElementById('aqi-station-text');
       const sn = a.site ? escapeHtml_(a.site) : '';
-      if (a.site) st.innerHTML = '<span class="mx-1" aria-hidden="true">｜</span>空品 ' + (old ? `<span class="text-amber-700 dark:text-amber-400" title="空品資料較舊"><i class="fa-solid fa-clock-rotate-left text-[11px]" aria-hidden="true"></i> ${sn}<span class="sr-only">（較舊）</span></span>` : sn) + (parseFloat(a.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(a.distanceKm)} km）` : '');
+      if (a.site) st.innerHTML = '<span class="mx-1" aria-hidden="true">｜</span>空品 ' + (old ? `<span class="text-amber-700 dark:text-amber-400" title="空品資料較舊"><i class="fa-solid fa-clock-rotate-left text-xs" aria-hidden="true"></i> ${sn}<span class="sr-only">（較舊）</span></span>` : sn) + (parseFloat(a.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(a.distanceKm)} km）` : '');
       else st.textContent = '';
     }
 
@@ -944,13 +953,13 @@ function wxIconInfo(text, isNight) {
       const data = deg !== null
         ? `<span class="inline-block w-5 flex justify-center"><i class="fa-solid fa-arrow-down inline-block" style="transform:rotate(${deg}deg)" aria-hidden="true"></i></span>`
         : '<span class="inline-block w-5 text-center">—</span>';
-      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1" title="${escapeHtml_(dirText) || '無資料'}"><i class="fa-solid fa-wind w-3 text-center text-[11px]" aria-hidden="true"></i>${data}</div>`;
+      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1" title="${escapeHtml_(dirText) || '無資料'}"><i class="fa-solid fa-wind w-3 text-center text-xs" aria-hidden="true"></i>${data}</div>`;
     }
     function rainSpan_(pct, wrapCls) {
-      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1"><i class="fa-solid fa-umbrella w-3 text-center text-[11px]" aria-hidden="true"></i><span class="inline-block w-6 text-right tabular-nums">${hasVal_(pct) ? escapeHtml_(pct) : '--'}%</span></div>`;
+      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1"><i class="fa-solid fa-umbrella w-3 text-center text-xs" aria-hidden="true"></i><span class="inline-block w-6 text-right tabular-nums">${hasVal_(pct) ? escapeHtml_(pct) : '--'}%</span></div>`;
     }
     function rhSpan_(pct, wrapCls) {
-      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1"><i class="fa-solid fa-droplet w-3 text-center text-[11px]" aria-hidden="true"></i><span class="inline-block w-6 text-right tabular-nums">${hasVal_(pct) ? escapeHtml_(pct) : '--'}%</span></div>`;
+      return `<div class="${wrapCls || ''} flex items-center justify-center gap-0.5 py-1"><i class="fa-solid fa-droplet w-3 text-center text-xs" aria-hidden="true"></i><span class="inline-block w-6 text-right tabular-nums">${hasVal_(pct) ? escapeHtml_(pct) : '--'}%</span></div>`;
     }
     function wxSpan_(text, isNight, wrapCls, muted) {
       const { icon, color } = wxIconInfo(text, isNight);
@@ -1028,7 +1037,7 @@ function wxIconInfo(text, isNight) {
       // 逐1小時資料結束、改為每3小時的位置：畫一條點線並在底部標示
       const k3 = cols.findIndex((c, i) => i > 0 && !c.tempExact && cols[i - 1].tempExact);
       const line3 = k3 > 0 ? `<div class="absolute bottom-0 border-l border-dotted border-muji-textMutedLight/40 dark:border-muji-textMutedDark/40 pointer-events-none" style="left:${k3 * colw}px;top:${STRIP_.HEAD_H}px"></div>` : '';
-      const label3 = k3 > 0 ? `<div class="relative h-4"><span class="absolute top-0 whitespace-nowrap text-[11px] ${MUTED_}" style="left:${k3 * colw + 6}px">此後每 3 小時 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span></div>` : '';
+      const label3 = k3 > 0 ? `<div class="relative h-4"><span class="absolute top-0 whitespace-nowrap text-xs ${MUTED_}" style="left:${k3 * colw + 6}px">此後每 3 小時 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span></div>` : '';
       const svgH = STRIP_.SVG_H;
       const xs = cols.map((c, i) => colw * (i + 0.5));
       const ys = cols.map(c => STRIP_.TOP_PAD + (tmax - c.temp) / span * STRIP_.SPAN);
@@ -1073,7 +1082,7 @@ function wxIconInfo(text, isNight) {
                   <div class="grid text-blue-600 dark:text-blue-400 font-medium" style="${gridCols}">${rainRow}</div>
                   <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${rhRow}</div>
                   <div class="grid text-muji-textMutedLight dark:text-muji-textMutedDark" style="${gridCols}">${windRow}</div>
-                  <div class="grid text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 pb-2 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25" style="${gridCols}">${comfortRow}</div>
+                  <div class="grid text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 pb-2 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25" style="${gridCols}">${comfortRow}</div>
                   ${label3}
                 </div>
               </div>
@@ -1323,13 +1332,13 @@ function wxIconInfo(text, isNight) {
       const label = isDay ? '<i class="fa-solid fa-sun" aria-hidden="true"></i> 白天' : '<i class="fa-solid fa-moon" aria-hidden="true"></i> 晚上';
       return `
               <div class="rounded-2xl ${isDay ? '' : 'mt-3'} ${bgCls} p-3 space-y-2">
-                <p class="text-[11px] font-bold ${labelCls} flex items-center gap-1.5">${label}</p>
+                <p class="text-xs font-bold ${labelCls} flex items-center gap-1.5">${label}</p>
                 <div class="flex justify-between text-base">${wxRow}</div>
                 ${weekTempBar(cols, isDay)}
                 <div class="flex justify-between text-blue-600 dark:text-blue-400 font-medium">${rainRow}</div>
                 <div class="flex justify-between text-muji-textMutedLight dark:text-muji-textMutedDark">${rhRow}</div>
                 <div class="flex justify-between text-muji-textMutedLight dark:text-muji-textMutedDark">${windRow}</div>
-                <div class="flex justify-between text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25">${comfortRow}</div>
+                <div class="flex justify-between text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pt-1 border-t border-muji-textMutedLight/25 dark:border-muji-textMutedDark/25">${comfortRow}</div>
               </div>`;
     }
 
@@ -1600,10 +1609,12 @@ function switchTab(tabKey) {
 
   if (tabKey === 'weekly' && weeklyStale) loadWeeklyForecast();
   if (tabKey === 'maps') {
+    loadVisibleMapFrames_();
     if (!radarFrames) loadRadarNowcast();
     else if (!document.getElementById('map-rainhelper-view').classList.contains('hidden')) startRadar_();
   } else {
     stopRadar_(); // 離開地圖分頁就停掉雷達動畫計時器
+    unloadMapFrames_();
   }
 }
 
@@ -1659,6 +1670,16 @@ setInterval(() => {
 }, 10 * 60 * 1000);
 
 // ==================== 地圖子分頁切換 ====================
+/** 第三方地圖 iframe：第一次看到才載入，離開「即時地圖」分頁就清空（停掉背景連線與計時器），回來時重新載入 */
+function loadVisibleMapFrames_() {
+  ['aqimap', 'airbox'].forEach(key => {
+    const view = document.getElementById(`map-${key}-view`), f = view && view.querySelector('iframe');
+    if (f && !view.classList.contains('hidden') && f.getAttribute('src') !== f.dataset.src) f.src = f.dataset.src;
+  });
+}
+function unloadMapFrames_() {
+  document.querySelectorAll('#map-aqimap-view iframe, #map-airbox-view iframe').forEach(f => { if (f.getAttribute('src')) f.src = 'about:blank'; });
+}
 function switchMapSubTab(subTab) {
   const keys = ['rainhelper', 'aqimap', 'airbox'];
   keys.forEach(key => {
@@ -1672,6 +1693,7 @@ function switchMapSubTab(subTab) {
       btn.className = "px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight";
     }
   });
+  loadVisibleMapFrames_();
   if (subTab === 'rainhelper') {
     if (!radarFrames) loadRadarNowcast(); else startRadar_();
   } else {
@@ -1755,7 +1777,7 @@ let alertSeq = 0;
 function alertBadgeHtml_(a) {
   const lv = a.color ? '・' + String(a.color).replace('色', '') : ''; // 等級併進膠囊，例如「大雨・黃」；沒有等級的只顯示名稱，固定寬度讓標題對齊
   const cls = !a.color && a.type === '颱風' ? ALERT_COLOR_MAP_['橙色'] : alertColorCls_(a.color); // 颱風沒有等級顏色時固定橘色
-  return `<span class="shrink-0 w-[5.5rem] text-center py-0.5 rounded-md text-[11px] font-bold ${cls}">${escapeHtml_(a.type)}${escapeHtml_(lv)}</span>`;
+  return `<span class="shrink-0 w-[5.5rem] text-center py-0.5 rounded-md text-xs font-bold ${cls}">${escapeHtml_(a.type)}${escapeHtml_(lv)}</span>`;
 }
 
 /** 特報卡顯示一段提示文字（例如載入失敗），不要讓使用者誤以為「沒有特報」 */
@@ -1831,7 +1853,7 @@ function isMyCounty_(loc) {
 function renderAlertAreas_(a) {
   if (a.areas && a.areas.length > 0) {
     const items = a.areas.map(loc => isMyCounty_(loc) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark">📍${escapeHtml_(loc)}</strong>` : escapeHtml_(loc)).join('、');
-    const guessNote = a.areasGuessed ? '<span class="text-[11px] font-normal ml-1 text-muji-textMutedLight dark:text-muji-textMutedDark">（依內文推測）</span>' : '';
+    const guessNote = a.areasGuessed ? '<span class="text-xs font-normal ml-1 text-muji-textMutedLight dark:text-muji-textMutedDark">（依內文推測）</span>' : '';
     return `<div class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark"><p class="font-bold mb-1">影響地區：${guessNote}</p><p>${items}</p></div>`;
   }
   if (a.coversCounty) {
@@ -1921,7 +1943,24 @@ async function loadEarthquake() {
   renderEarthquakeList();
 }
 
-// 卡片左側色條：依最新一筆的最大震度（1–2級灰、3–4級黃、5級橘、6級以上紅）
+// 卡片左側色條：依「最新一筆在使用者所在縣市的震度」（1–2級灰、3–4級黃、5級橘、6級以上紅；該縣市沒有震度或超過24小時為灰）
+const normCounty_ = c => String(c || '').replace(/臺/g, '台');
+function localIntensity_(areas) {
+  let best = -1, label = null;
+  (areas || []).forEach(a => {
+    if (!String(a.county || '').split('、').some(c => normCounty_(c) === normCounty_(currentCounty))) return;
+    const idx = INTENSITY_ORDER_.indexOf(a.intensity);
+    if (idx > best) { best = idx; label = a.intensity; }
+  });
+  return label;
+}
+/** 依所在縣市重算色條與讀屏說明；換地點時也要呼叫 */
+function applyEqLocal_() {
+  if (!latestEarthquakeData || latestEarthquakeData.length === 0) return;
+  const eq = latestEarthquakeData[0], local = localIntensity_(eq.areas);
+  setEqBorder_(local, eq.originTime);
+  setText_('eq-local-sr', local ? `最新一筆在${currentCounty}的震度為${local}` : `最新一筆在${currentCounty}沒有震度紀錄`);
+}
 const EQ_BORDER_ALL_ = ['border-l-yellow-500', 'border-l-orange-500', 'border-l-red-500', ...ALERT_BORDER_NEUTRAL_];
 function setEqBorder_(intensity, originTime) {
   const card = document.getElementById('earthquake-card');
@@ -1936,19 +1975,19 @@ function renderEarthquakeList() {
   const row = (eq, i) => {
     const mi = maxIntensity_(eq.areas);
     return `<button type="button" onclick="openEarthquakeDetail(${i})" aria-haspopup="dialog" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
-      <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-[11px] font-bold ${MAGNITUDE_BADGE_CLS_}"><span class="sr-only">規模 </span>M${escapeHtml_(eq.magnitude)}</span>
-      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[11px] font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">最大震度 </span>${escapeHtml_(mi)}</span>
+      <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-xs font-bold ${MAGNITUDE_BADGE_CLS_}"><span class="sr-only">規模 </span>M${escapeHtml_(eq.magnitude)}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">最大震度 </span>${escapeHtml_(mi)}</span>
       <span class="flex-1 min-w-0 truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
       <span class="text-muji-textMutedLight dark:text-muji-textMutedDark shrink-0 text-right leading-tight text-xs">
         <span class="block">${escapeHtml_(relativeTime_(eq.originTime))}</span>
-        <span class="block text-[11px]">${escapeHtml_((eq.originTime || '').slice(5))}</span>
+        <span class="block text-xs">${escapeHtml_((eq.originTime || '').slice(5))}</span>
       </span>
     </button>`;
   };
   // 收合時只顯示最新一筆；展開後顯示完整清單（最新一筆在清單內，所以展開時隱藏摘要）
   setText_('eq-count', `近 ${latestEarthquakeData.length} 筆`);
   document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0);
-  setEqBorder_(maxIntensity_(latestEarthquakeData[0].areas), latestEarthquakeData[0].originTime);
+  applyEqLocal_();
   document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map(row).join('');
 }
 
@@ -1967,12 +2006,12 @@ function openEarthquakeDetail(i) {
     <span class="inline-block px-2 py-0.5 rounded-lg text-sm font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
     <span class="inline-block px-2 py-0.5 rounded-lg text-sm font-bold ${intensityBadgeCls_(mi)}">${escapeHtml_(mi)}</span>
     <span class="text-sm font-bold ml-1">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
-    <span class="text-[11px] text-muji-textMutedLight dark:text-muji-textMutedDark ml-1">#${escapeHtml_(eq.earthquakeNo)}</span>`;
+    <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark ml-1">#${escapeHtml_(eq.earthquakeNo)}</span>`;
 
   const groupLines = groupByIntensity_(eq.areas).map(g => {
     const counties = g.counties.map(c => c === currentCounty ? `<strong class="text-muji-accentLight dark:text-muji-accentDark">📍${escapeHtml_(c)}</strong>` : escapeHtml_(c));
     return `<div class="flex items-start gap-2">
-      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-[11px] font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
       <span class="flex-1">${counties.join('、')}</span>
     </div>`;
   }).join('');
@@ -2086,6 +2125,7 @@ function switchLocation(county, township) {
   weeklyStale = true;
   if (currentTab === 'weekly') loadWeeklyForecast();
   updateRadarMarker();
+  applyEqLocal_();
 }
 
     function applySelectedLocation() {
@@ -2144,7 +2184,7 @@ function switchLocation(county, township) {
       el.innerHTML = list.map((f, i) => `
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muji-bgLight dark:bg-muji-bgDark border border-muji-borderLight dark:border-muji-borderDark text-xs">
           <button type="button" data-fav-goto="${i}" class="hover:text-muji-accentLight dark:hover:text-muji-accentDark">${escapeHtml_(f.county)}${escapeHtml_(f.township)}</button>
-          <button type="button" data-fav-remove="${i}" class="text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-red-500" title="移除" aria-label="移除常用地點"><i class="fa-solid fa-xmark text-[11px]" aria-hidden="true"></i></button>
+          <button type="button" data-fav-remove="${i}" class="text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-red-500" title="移除" aria-label="移除常用地點"><i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i></button>
         </span>`).join('');
     }
     // 事件委派：常用地點清單只綁一次在父容器上，避免用字串拼接onclick塞入地名（萬一地名含特殊字元會斷字串）
