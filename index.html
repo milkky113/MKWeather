@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-08 #2 12:10 明日預報加降雨機率、地震色條依所在縣市、字級簡化三級、iframe 延後載入、preconnect -->
+<!-- 版本：2026-11-08 #3 22:38 重載整併、iframe 卸載修正、地震本地震度、a11y 補強、逐時規則說明、天氣圖示對比 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -10,7 +10,8 @@
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin> <!-- 字型檔是 CORS 請求，要另開一條 crossorigin 連線 -->
-  <link rel="preconnect" href="https://script.google.com" crossorigin> <!-- API 以 fetch（CORS）呼叫 -->
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin> <!-- GAS 網頁應用程式會轉址到此網域，實際回應從這裡來 --> <!-- API 以 fetch（CORS）呼叫 -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -87,11 +88,12 @@
       <div class="flex items-center gap-3 shrink-0">
         <img src="favicon.svg" alt="MK天氣" class="w-8 h-8 rounded-full">
         <div>
+          <span id="loc-announce" role="status" aria-live="polite" class="sr-only"></span>
           <h1 tabindex="-1" class="text-base sm:text-lg font-bold tracking-wide">天氣預報</h1>
           <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark flex items-center gap-2">
             <button type="button" onclick="toggleLocationModal(true)" id="header-location-btn" aria-label="變更地點" class="hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-colors"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="header-location-text">台中市東區</span></button>
             <span class="opacity-40">|</span>
-            <span><i class="fa-solid fa-clock text-xs" aria-hidden="true"></i> 觀測於 <span id="header-obstime">--:--</span></span>
+            <span><i id="header-clock" class="fa-solid fa-clock text-xs" aria-hidden="true"></i> 觀測於 <span id="header-obstime">--:--</span><span id="header-obstime-sr" class="sr-only"></span></span>
           </p>
         </div>
       </div>
@@ -181,7 +183,7 @@
               <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark mb-2 flex items-center gap-1.5"><i class="fa-solid fa-calendar-day text-muji-accentLight dark:text-muji-accentDark" aria-hidden="true"></i> 明日預報</span>
               <span class="text-xs font-light flex flex-col gap-0.5 whitespace-nowrap">
                 <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">日</span><i id="tm-day-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-day-temp">--</span></span><span id="tm-day-sr" class="sr-only"></span></span>
-                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">夜</span><i id="tm-night-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-night-temp">--</span></span><span id="tm-night-sr" class="sr-only"></span></span>
+                <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">晚</span><i id="tm-night-icon" aria-hidden="true" class="fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark"></i><span id="tm-night-temp">--</span></span><span id="tm-night-sr" class="sr-only"></span></span>
                 <span><span class="flex items-center gap-1" aria-hidden="true"><span class="w-3 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark"><i class="fa-solid fa-umbrella"></i></span><span id="tm-pop">--</span></span><span id="tm-pop-sr" class="sr-only"></span></span>
               </span>
             </div>
@@ -275,7 +277,7 @@
         
         <!-- 地圖子頁籤切換 -->
         <div class="flex justify-center border-b border-muji-borderLight dark:border-muji-borderDark pb-3 gap-4 flex-wrap">
-          <button onclick="switchMapSubTab('rainhelper')" id="subtab-rainhelper" class="px-4 py-1.5 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark">
+          <button onclick="switchMapSubTab('rainhelper')" id="subtab-rainhelper" aria-current="true" class="px-4 py-1.5 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark">
             落雨小幫手
           </button>
           <button onclick="switchMapSubTab('aqimap')" id="subtab-aqimap" class="px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight">
@@ -318,13 +320,15 @@
 </div>
 
           <div id="map-aqimap-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
-            <iframe data-src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" title="空品地圖"></iframe>
             <a href="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" target="_blank" rel="noopener" aria-label="開啟空品地圖官方頁面（另開新分頁）" title="開啟空品地圖官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            <p id="map-aqimap-loading" role="status" class="hidden absolute inset-0 flex items-center justify-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none">載入中…</p>
+            <iframe data-src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" title="空品地圖"></iframe>
           </div>
 
           <div id="map-airbox-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
-            <iframe data-src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" title="空氣盒子"></iframe>
             <a href="https://airbox.edimaxcloud.com/" target="_blank" rel="noopener" aria-label="開啟空氣盒子官方頁面（另開新分頁）" title="開啟空氣盒子官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            <p id="map-airbox-loading" role="status" class="hidden absolute inset-0 flex items-center justify-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none">載入中…</p>
+            <iframe data-src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" title="空氣盒子"></iframe>
           </div>
         </div>
 
@@ -684,15 +688,15 @@
 // 天氣現象文字 → icon+顏色 對照（沿用逐時預報/週預報既有色票，全站配色一致）
 function wxIconInfo(text, isNight) {
   if (!text) return { icon: 'fa-cloud', color: 'text-gray-500' };
-  if (/雷/.test(text)) return { icon: 'fa-cloud-bolt', color: 'text-violet-400' };
-  if (/豪雨|大雨|暴雨/.test(text)) return { icon: 'fa-cloud-showers-heavy', color: 'text-blue-500' };
-  if (/陣雨|雨/.test(text)) return { icon: 'fa-cloud-rain', color: 'text-blue-400' };
-  if (/雪/.test(text)) return { icon: 'fa-snowflake', color: 'text-slate-300' };
+  if (/雷/.test(text)) return { icon: 'fa-cloud-bolt', color: 'text-violet-600 dark:text-violet-400' };
+  if (/豪雨|大雨|暴雨/.test(text)) return { icon: 'fa-cloud-showers-heavy', color: 'text-blue-600 dark:text-blue-500' };
+  if (/陣雨|雨/.test(text)) return { icon: 'fa-cloud-rain', color: 'text-blue-600 dark:text-blue-400' };
+  if (/雪/.test(text)) return { icon: 'fa-snowflake', color: 'text-slate-500 dark:text-slate-300' };
   if (/霧|靄|霾/.test(text)) return { icon: 'fa-smog', color: 'text-gray-500' };
   if (/^陰/.test(text)) return { icon: 'fa-cloud', color: 'text-gray-500' }; // 「陰時多雲」以陰為主，要排在多雲之前
-  if (/多雲/.test(text)) return isNight ? { icon: 'fa-cloud-moon', color: 'text-indigo-300' } : { icon: 'fa-cloud-sun', color: 'text-amber-600' };
+  if (/多雲/.test(text)) return isNight ? { icon: 'fa-cloud-moon', color: 'text-indigo-500 dark:text-indigo-300' } : { icon: 'fa-cloud-sun', color: 'text-amber-600' };
   if (/陰/.test(text)) return { icon: 'fa-cloud', color: 'text-gray-500' };
-  if (/晴/.test(text)) return isNight ? { icon: 'fa-moon', color: 'text-indigo-300' } : { icon: 'fa-sun', color: 'text-amber-600' };
+  if (/晴/.test(text)) return isNight ? { icon: 'fa-moon', color: 'text-indigo-500 dark:text-indigo-300' } : { icon: 'fa-sun', color: 'text-amber-600' };
   return { icon: 'fa-cloud', color: 'text-gray-500' };
 }
 
@@ -739,7 +743,7 @@ function wxIconInfo(text, isNight) {
       setText_('val-comfort', '載入中');
       setText_('val-wx-now', '載入中');
       document.getElementById('wx-icon').className = `fa-solid fa-cloud ${nowIconSize_('fa-cloud')} text-gray-400`;
-      document.getElementById('header-obstime').classList.remove('text-amber-700', 'dark:text-amber-400');
+      setObsStaleHeader_(false);
       setText_('val-pop', '--%');
       setText_('val-rh', '--%');
       setText_('tm-pop', '--'); setText_('tm-pop-sr', '');
@@ -753,7 +757,7 @@ function wxIconInfo(text, isNight) {
       setText_('val-aqi-status', '');
       setText_('val-sunrise', '--:--');
       setText_('val-sunset', '--:--');
-      sunHours_ = null; lastObsWeather_ = null; lastFcWeather_ = null;
+      sunHours_ = null; lastObsWeather_ = null; lastFcWeather_ = null; obsStale_ = false;
       setText_('obs-station-text', '');
       setText_('aqi-station-text', '');
       document.getElementById('today-retry').classList.add('hidden');
@@ -780,8 +784,12 @@ function wxIconInfo(text, isNight) {
     const OBS_STALE_MS_ = 90 * 60000;      // 觀測超過 90 分鐘視為較舊
     const AQI_STALE_MS_ = 3 * 3600000;     // 空品發布超過 3 小時視為較舊
     let lastObsWeather_ = null, lastFcWeather_ = null, obsStale_ = false;
-    /** 現在天氣文字：優先用觀測；觀測缺值才用預報天氣（文字不加註） */
-    function nowWx_() { if (obsStale_ && hasVal_(lastFcWeather_)) return lastFcWeather_; return hasVal_(lastObsWeather_) ? lastObsWeather_ : hasVal_(lastFcWeather_) ? lastFcWeather_ : null; }
+    /** 現在天氣文字：優先用觀測；觀測過舊或缺值才用預報天氣（文字不加註） */
+    function nowWx_() {
+      if (obsStale_ && hasVal_(lastFcWeather_)) return lastFcWeather_; // 觀測過舊：改用預報
+      if (hasVal_(lastObsWeather_)) return lastObsWeather_;
+      return hasVal_(lastFcWeather_) ? lastFcWeather_ : null;
+    }
     function refreshWxNow_() {
       const w = nowWx_();
       setText_('val-wx-now', w === null ? '--' : w);
@@ -791,14 +799,24 @@ function wxIconInfo(text, isNight) {
       const { icon, color } = wxIconInfo(nowWx_(), isNightHour_(taipeiNow_().h));
       document.getElementById('wx-icon').className = `fa-solid ${icon} ${nowIconSize_(icon)} ${color}`;
     }
+    /** 測站名稱的「資料較舊」標示：琥珀色＋時鐘倒轉圖示＋讀屏「（較舊）」；name 須已 escape */
+    function staleSpan_(name, title) {
+      return `<span class="text-amber-700 dark:text-amber-400" title="${title}"><i class="fa-solid fa-clock-rotate-left text-xs" aria-hidden="true"></i> ${name}<span class="sr-only">（較舊）</span></span>`;
+    }
+    /** 標頭「觀測於」過舊標示：琥珀色＋時鐘倒轉圖示＋讀屏「（較舊）」，不只靠顏色 */
+    function setObsStaleHeader_(stale) {
+      const t = document.getElementById('header-obstime'), ic = document.getElementById('header-clock');
+      t.classList.toggle('text-amber-700', stale); t.classList.toggle('dark:text-amber-400', stale);
+      ic.classList.toggle('fa-clock', !stale); ic.classList.toggle('fa-clock-rotate-left', stale);
+      setText_('header-obstime-sr', stale ? '（較舊）' : '');
+    }
     function renderObs_(t) {
       setText_('header-obstime', (t.obsTime || '').slice(11, 16) || '--:--');
       const temp = parseFloat(t.temperature);
       setText_('val-temp', isNaN(temp) ? '--°' : `${Math.round(temp)}°`);
       const ot = parseCwaTime_(t.obsTime);
       obsStale_ = !!(ot && nowWallMs_() - ot.ms > OBS_STALE_MS_);
-      document.getElementById('header-obstime').classList.toggle('text-amber-700', obsStale_);
-      document.getElementById('header-obstime').classList.toggle('dark:text-amber-400', obsStale_);
+      setObsStaleHeader_(obsStale_);
       lastObsWeather_ = t.weather;
       refreshWxNow_();
       setText_('val-rh', hasVal_(t.humidity) ? `${t.humidity}%` : '--%');
@@ -812,7 +830,7 @@ function wxIconInfo(text, isNight) {
       if (t.stationName) {
         const nm = escapeHtml_(t.stationName);
         const far = parseFloat(t.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(t.distanceKm)} km）` : '';
-        document.getElementById('obs-station-text').innerHTML = '觀測 ' + (obsStale_ ? `<span class="text-amber-700 dark:text-amber-400" title="觀測資料較舊"><i class="fa-solid fa-clock-rotate-left text-xs" aria-hidden="true"></i> ${nm}<span class="sr-only">（較舊）</span></span>` : nm) + far;
+        document.getElementById('obs-station-text').innerHTML = '觀測 ' + (obsStale_ ? staleSpan_(nm, '觀測資料較舊') : nm) + far;
       }
     }
 
@@ -837,16 +855,16 @@ function wxIconInfo(text, isNight) {
         const wxt = wx && wx.value.Weather, okT = hasVal_(hiV) && hasVal_(loV);
         setText_(`tm-${k}-temp`, okT ? `${loV}°–${hiV}°` : '--');
         const iconEl = document.getElementById(`tm-${k}-icon`);
-        if (hasVal_(wxt)) { const { icon, color } = wxIconInfo(wxt, !isDay); iconEl.className = `fa-solid ${icon} text-sm w-4 text-center ${color}`; } // 圖示用天氣原色，日夜另有「日／夜」文字
+        if (hasVal_(wxt)) { const { icon, color } = wxIconInfo(wxt, !isDay); iconEl.className = `fa-solid ${icon} text-sm w-4 text-center ${color}`; } // 圖示用天氣原色，日夜另有「日／晚」文字
         else iconEl.className = 'fa-solid fa-minus text-sm w-4 text-center text-muji-textMutedLight dark:text-muji-textMutedDark';
-        setText_(`tm-${k}-sr`, `${isDay ? '白天' : '晚上'}，${hasVal_(wxt) ? wxt : '天氣未提供'}，${okT ? `${loV} 到 ${hiV} 度` : '溫度未提供'}`);
+        setText_(`tm-${k}-sr`, `${isDay ? '明天白天' : '明晚'}，${hasVal_(wxt) ? wxt : '天氣未提供'}，${okT ? `${loV} 到 ${hiV} 度` : '溫度未提供'}`);
       });
-      setText_('tm-pop', `${pops.day}／${pops.night}`); // 左白天、右晚上，順序與上面兩行相同
-      setText_('tm-pop-sr', `降雨機率，白天 ${pops.day}，晚上 ${pops.night}`);
+      setText_('tm-pop', pops.day === '--' && pops.night === '--' ? '--' : `日${pops.day} 晚${pops.night}`);
+      setText_('tm-pop-sr', `降雨機率，明天白天 ${pops.day}，明晚 ${pops.night}`);
     }
     function renderAqi_(a) {
       const bad = aqiInvalid_(a);
-      const lv = bad ? { label: '暫無有效資料', cls: 'text-muji-textMutedLight dark:text-muji-textMutedDark' } : aqiLevel_(a.aqi);
+      const lv = bad ? { label: a.reason === 'far' ? '無鄰近測站' : '暫無有效資料', cls: 'text-muji-textMutedLight dark:text-muji-textMutedDark' } : aqiLevel_(a.aqi);
       const pt = parseCwaTime_(String(a.publishTime || '').replace(/\//g, '-'));
       const old = !!(pt && nowWallMs_() - pt.ms > AQI_STALE_MS_);
       const numEl = document.getElementById('val-aqi-num');
@@ -859,7 +877,7 @@ function wxIconInfo(text, isNight) {
       statusEl.className = `text-xs font-normal leading-tight min-w-0 ${lv.cls}`;
       const st = document.getElementById('aqi-station-text');
       const sn = a.site ? escapeHtml_(a.site) : '';
-      if (a.site) st.innerHTML = '<span class="mx-1" aria-hidden="true">｜</span>空品 ' + (old ? `<span class="text-amber-700 dark:text-amber-400" title="空品資料較舊"><i class="fa-solid fa-clock-rotate-left text-xs" aria-hidden="true"></i> ${sn}<span class="sr-only">（較舊）</span></span>` : sn) + (parseFloat(a.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(a.distanceKm)} km）` : '');
+      if (a.site) st.innerHTML = '<span class="mx-1" aria-hidden="true">｜</span>空品 ' + (old ? staleSpan_(sn, '空品資料較舊') : sn) + (parseFloat(a.distanceKm) > STATION_FAR_KM_ ? `（約 ${Math.round(a.distanceKm)} km）` : '');
       else st.textContent = '';
     }
 
@@ -920,11 +938,15 @@ function wxIconInfo(text, isNight) {
         if (t.ok && typeof t.lat === 'number' && typeof t.lng === 'number') { setLatLng_(t.lat, t.lng); applySun(currentLocationLatLng); return; }
         return getLatLng_().then(applySun);
       });
-      const pTm = fetchWeekly_().then(r => { if (seq === todaySeq && r.ok) renderTomorrow_(r.elements || {}); });
+      const pTm = fetchWeekly_().then(r => {
+        if (seq !== todaySeq) return;
+        if (r.ok) renderTomorrow_(r.elements || {});
+        else { setText_('tm-day-sr', '明日預報暫時無法取得'); showRetry(); } // 失敗不再默默顯示「--」，讀屏也聽得到，並出現重試鈕
+      });
       const pAqi = fetchGas('aqi', q).then(a => {
         if (seq !== todaySeq) return;
         if (a.ok) renderAqi_(a);
-        else if (a.noData) renderAqi_({ aqi: null }); // 附近測站都沒有效資料：顯示「--」與說明，不當成錯誤重試
+        else if (a.noData) renderAqi_({ aqi: null, reason: a.reason }); // 附近測站都沒有效資料（reason: far＝太遠、invalid＝無效）：顯示「--」與說明，不當成錯誤重試
         else showRetry();
       });
       return Promise.allSettled([pObs, pAqi, pTm]);
@@ -976,7 +998,7 @@ function wxIconInfo(text, isNight) {
     let hourDays_ = [];     // [{key, x, target}]：每天起點(px)與日期按鈕要捲到的位置
     let hourPinned_ = null; // 剛按過日期按鈕時釘住該按鈕的亮起狀態，直到使用者自己捲動才解除
     let hourRaf_ = 0;
-    // 畫面常數：以下數字互相耦合，改任一個要同步檢查其他（圖會錯位）
+    // 畫面常數：以下數字互相耦合（HEAD_H 依賴日期列／時間列的 class 高度；需維持 TOP_PAD + SPAN < SVG_H，否則折線會被裁掉），改任一個要同步檢查其他（圖會錯位）
     //   HEAD_H＝日期列＋時間列的高度，日夜底色從這裡開始畫；SVG_H＝折線區高度（viewBox 同高）
     //   TOP_PAD／SPAN＝折線在 SVG 內的上緣留白與高低溫對應的垂直範圍；DOT_TOP＝折線區上方留給溫度數字的高度
     const STRIP_ = { HEAD_H: 52, SVG_H: 96, TOP_PAD: 12, SPAN: 66, DOT_TOP: 16 };
@@ -986,6 +1008,13 @@ function wxIconInfo(text, isNight) {
     function tickKey_() { const n = taipeiNow_(); return `${n.y}-${pad2(n.m)}-${pad2(n.d)} ${pad2(n.h)}`; }
 
     /** 把所有小時欄位畫成一條連續長條；回傳 {html, days:[{key,label,x}]} */
+    /*
+     * 欄位旗標對照（allCols 每一欄）：
+     *   blockFirst ＝ 該3小時區段的第一小時；其餘小時的天氣／降雨／風向是「重複顯示」→ 灰字（第一個可見欄除外）
+     *   tempExact／rhExact／comfortExact ＝ 該小時有逐1小時的真實值（只有第1天）；沒有就是借用所屬區段的值
+     *   isReal（溫度）＝ tempExact 或 blockFirst：畫圓點與實線／虛線的「真實資料點」
+     *   isNow ＝ 現在這個整點；讀屏摘要取 blockFirst 欄（每3小時一筆）
+     */
     function buildHourStrip_(cols) {
       const n = cols.length, colw = HOUR_COLW_, totalW = n * colw;
       const gridCols = `grid-template-columns:repeat(${n},${colw}px)`;
@@ -1019,16 +1048,17 @@ function wxIconInfo(text, isNight) {
       // 天氣/降雨機率/風向為3小時一筆 → 每小時重複畫同一個值；逐時資料（濕度/舒適度/溫度）→ 有逐時才各自一格（否則合併跨欄）
       const MUTED_ = 'text-muji-textMutedLight dark:text-muji-textMutedDark', PRIMARY_ = 'text-muji-textPrimaryLight dark:text-muji-textPrimaryDark';
       // 3小時值裡「重複顯示」的小時＝灰字（有逐時真實值的、區段第一小時都維持原色）；不用 opacity，對比才夠
-      const isRep = (c, exactKey) => !c.blockFirst && !(exactKey && c[exactKey]);
+      const isRep = (c, exactKey) => c !== cols[0] && !c.blockFirst && !(exactKey && c[exactKey]); // 第一個可見欄（現在）一律原色
       const wxRow = cols.map(c => wxSpan_(c.weather, isNightHour_(c.hour), '', isRep(c))).join('');
       const rainRow = cols.map(c => rainSpan_(c.pop, isRep(c) ? MUTED_ + ' font-normal' : '')).join('');
       const rhRow = cols.map(c => rhSpan_(c.rh, isRep(c, 'rhExact') ? MUTED_ : PRIMARY_)).join('');
       const windRow = cols.map(c => windSpan_(c.wind, isRep(c) ? MUTED_ : PRIMARY_)).join('');
       const comfortRow = cols.map(c => comfortSpan_(c.comfort, isRep(c, 'comfortExact') ? MUTED_ : PRIMARY_)).join('');
       // 溫度「真實資料點」：有逐時資料的每一小時；只有3小時資料的區段只取區段第一欄。標籤、圓點、折線都只用這些點
-      const isReal = (c, i) => !isNaN(c.temp) && (c.tempExact || c.blockFirst);
+      const isReal = c => !isNaN(c.temp) && (c.tempExact || c.blockFirst);
       // 每小時都標溫度；3 小時值重複的欄位用淡色，區分真實資料點
-      const tempLabels = cols.map((c, i) => `<div class="text-center${isReal(c, i) ? '' : ' ' + MUTED_ + ' font-normal'}">${isNaN(c.temp) ? '--' : c.temp + '°'}</div>`).join('');
+      // 虛線終點欄（資料最後一欄、非真實點）只是線的終點，不標數字，免得被當成預報值
+      const tempLabels = cols.map((c, i) => `<div class="text-center${isReal(c) ? '' : ' ' + MUTED_ + ' font-normal'}">${isNaN(c.temp) || (i === cols.length - 1 && !isReal(c)) ? (isNaN(c.temp) ? '--' : '') : c.temp + '°'}</div>`).join('');
 
       // 溫度曲線：整條共用同一組最高/最低溫刻度，日與日之間連續不中斷
       const temps = cols.map(c => c.temp).filter(t => !isNaN(t));
@@ -1037,14 +1067,14 @@ function wxIconInfo(text, isNight) {
       // 逐1小時資料結束、改為每3小時的位置：畫一條點線並在底部標示
       const k3 = cols.findIndex((c, i) => i > 0 && !c.tempExact && cols[i - 1].tempExact);
       const line3 = k3 > 0 ? `<div class="absolute bottom-0 border-l border-dotted border-muji-textMutedLight/40 dark:border-muji-textMutedDark/40 pointer-events-none" style="left:${k3 * colw}px;top:${STRIP_.HEAD_H}px"></div>` : '';
-      const label3 = k3 > 0 ? `<div class="relative h-4"><span class="absolute top-0 whitespace-nowrap text-xs ${MUTED_}" style="left:${k3 * colw + 6}px">此後每 3 小時 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span></div>` : '';
+      const label3 = k3 > 0 ? `<div class="relative h-4"><span class="absolute top-0 whitespace-nowrap text-xs ${MUTED_}" style="left:${k3 * colw + 6}px">灰字＝3 小時值 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span></div>` : '';
       const svgH = STRIP_.SVG_H;
       const xs = cols.map((c, i) => colw * (i + 0.5));
       const ys = cols.map(c => STRIP_.TOP_PAD + (tmax - c.temp) / span * STRIP_.SPAN);
       const segColor = c => !isNightHour_(c.hour) ? 'text-amber-500' : 'text-indigo-400 dark:text-indigo-300';
       const segBg = c => !isNightHour_(c.hour) ? 'bg-amber-500' : 'bg-indigo-400 dark:bg-indigo-300';
       // 折線：相鄰兩點一段；兩端都有逐時真實資料→實線，否則虛線（表示該段只有3小時預報）
-      const realIdx = cols.map((c, i) => isReal(c, i) ? i : -1).filter(i => i >= 0);
+      const realIdx = cols.map((c, i) => isReal(c) ? i : -1).filter(i => i >= 0);
       const lastI = cols.length - 1; // 資料最後一欄也當折線終點（虛線平接、不畫圓點），否則最後一個3小時區段沒有線
       if (realIdx.length && realIdx[realIdx.length - 1] !== lastI && !isNaN(ys[lastI])) realIdx.push(lastI);
       const paths = realIdx.slice(0, -1).map((i, k) => {
@@ -1055,11 +1085,11 @@ function wxIconInfo(text, isNight) {
       // 圓點用HTML圓形元素（避免SVG被拉成橢圓）；svg在容器底部，上方留16px
       const dots = cols.map((c, i) => {
         if (isNaN(ys[i])) return '';
-        return isReal(c, i) ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(STRIP_.DOT_TOP + ys[i]).toFixed(1)}px"></span>` : '';
+        return isReal(c) ? `<span class="absolute z-10 w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 ${segBg(c)}" style="left:${xs[i].toFixed(1)}px;top:${(STRIP_.DOT_TOP + ys[i]).toFixed(1)}px"></span>` : '';
       }).join('');
       const svg = `<svg class="absolute bottom-0 left-0 z-10" style="width:${totalW}px;height:${svgH}px" viewBox="0 0 ${totalW} ${svgH}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${dots}`;
       // 讀屏用文字摘要：長條本身 aria-hidden，每3小時一筆唸出時間、天氣、溫度、降雨、風向
-      const srItems = cols.filter((c, i) => i === 0 || c.hour % 3 === 0).map(c => {
+      const srItems = cols.filter((c, i) => i === 0 || c.blockFirst).map(c => {
         const parts = [`${c.isNow ? '現在 ' : ''}${c.dateLabel} ${c.hhmm}`, c.weather, isNaN(c.temp) ? '' : `${c.temp}度`,
           hasVal_(c.pop) ? `降雨機率${c.pop}%` : '', c.wind, hasVal_(c.rh) ? `濕度${c.rh}%` : '', hasVal_(c.comfort) ? c.comfort : ''];
         return `<li>${parts.filter(Boolean).map(p => escapeHtml_(p)).join('，')}</li>`;
@@ -1109,7 +1139,11 @@ function wxIconInfo(text, isNight) {
       });
     }
     /** 箭頭鈕用 aria-disabled（不用 disabled，免得焦點在鈕上時被丟掉） */
+    let hourArrowKey_ = ''; // 上次箭頭狀態；重畫長條（箭頭元素換新）時要清空
     function setHourArrows_(prevOff, nextOff) {
+      const key = `${prevOff}${nextOff}`;
+      if (key === hourArrowKey_ && document.getElementById('hour-prev')) return; // 狀態沒變就不寫 DOM（捲動時每個 frame 都會呼叫）
+      hourArrowKey_ = key;
       const prev = document.getElementById('hour-prev'), next = document.getElementById('hour-next');
       if (prev) prev.setAttribute('aria-disabled', String(prevOff));
       if (next) next.setAttribute('aria-disabled', String(nextOff));
@@ -1184,7 +1218,7 @@ function wxIconInfo(text, isNight) {
     async function loadHourlyForecastInner_() {
       const seq = ++hourSeq;
       hourDays_ = []; hourPinned_ = null; hourActiveKey_ = null; hourColsCache_ = null;
-      setHourArrows_(true, true);
+      hourArrowKey_ = ''; setHourArrows_(true, true);
       const tabsEl = document.getElementById('hour-day-tabs');
       const panelsEl = document.getElementById('hour-day-panels');
       tabsEl.innerHTML = `<div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div><div class="h-6 w-16 shrink-0 rounded-full bg-muji-borderLight dark:bg-muji-borderDark animate-pulse"></div>`;
@@ -1235,7 +1269,7 @@ function wxIconInfo(text, isNight) {
       const curHourMs = Math.floor(nowWallMs_() / 3600000) * 3600000; // 現在這個整點，更早的欄位不顯示
 
       const allCols = [];
-      blocks.forEach((block, bi) => {
+      blocks.forEach(block => {
         const bt = parseCwaTime_(block.startTime);
         if (!bt) return;
         const et = parseCwaTime_(block.endTime);
@@ -1246,7 +1280,6 @@ function wxIconInfo(text, isNight) {
           const hourISO = isoOf(ms);
           const dt = new Date(ms);
           allCols.push({
-            blockIdx: bi,
             blockFirst: h === 0, // 這個3小時區段的第一小時（之後的小時是重複顯示）
             isNow: ms === curHourMs,
             dateKey: `${pad2(dt.getUTCMonth() + 1)}${pad2(dt.getUTCDate())}`,
@@ -1293,7 +1326,7 @@ function wxIconInfo(text, isNight) {
       tabsEl.innerHTML = strip.days.map(d =>
         `<button type="button" onclick="switchHourDay('${d.key}')" id="hourtab-${d.key}" class="${HOUR_TAB_BASE_}${HOUR_TAB_OFF_}">${d.key === todayKey ? '今日' : d.label}</button>`).join('');
       panelsEl.innerHTML = strip.html;
-      hourActiveKey_ = null;
+      hourActiveKey_ = null; hourArrowKey_ = '';
       if (!keepScroll) hourPinned_ = null;
       setHourTab_(strip.days[0].key);
       setupHourStrip_();
@@ -1604,17 +1637,17 @@ function switchTab(tabKey) {
 
   if (tabKey === 'today') {
     hourPinned_ = null; onHourScroll_(); // 分頁隱藏時瀏覽器會把長條捲回起點，重新依位置亮起日期按鈕
-    if (hourlyLoadedKey_ && tickKey_() !== hourlyLoadedKey_) reloadTodayData_(); // 離開期間整點已過
+    if (hourlyLoadedKey_ && tickKey_() !== hourlyLoadedKey_) reloadAll_(); // 離開期間整點已過
   }
 
   if (tabKey === 'weekly' && weeklyStale) loadWeeklyForecast();
   if (tabKey === 'maps') {
-    loadVisibleMapFrames_();
+    syncMapFrames_(true);
     if (!radarFrames) loadRadarNowcast();
     else if (!document.getElementById('map-rainhelper-view').classList.contains('hidden')) startRadar_();
   } else {
     stopRadar_(); // 離開地圖分頁就停掉雷達動畫計時器
-    unloadMapFrames_();
+    syncMapFrames_(false);
   }
 }
 
@@ -1629,7 +1662,7 @@ async function refreshCurrentTab() {
   icon.classList.add('fa-spin');
   try {
     if (currentTab === 'today') {
-      await Promise.allSettled([loadTodayWeather(), loadHourlyForecast(), loadAlerts(), loadEarthquake()]);
+      await reloadAll_();
     } else if (currentTab === 'weekly') {
       await loadWeeklyForecast();
     } else if (currentTab === 'maps' && document.getElementById('map-rainhelper-view').classList.contains('hidden') === false) {
@@ -1643,43 +1676,58 @@ async function refreshCurrentTab() {
   }
 }
 
+/** 全部資料重載：回前景、整點偵測、手動重新整理共用同一份清單，新增資料區塊只要改這裡。回傳 Promise 讓手動重整可等待 */
+function reloadAll_() {
+  lastRefreshAt = Date.now();
+  weeklyStale = true;
+  const jobs = [loadTodayWeather(), loadHourlyForecast(), loadAlerts(), loadEarthquake()];
+  if (currentTab === 'weekly') jobs.push(loadWeeklyForecast());
+  if (radarShouldPlay_()) jobs.push(loadRadarNowcast());
+  return Promise.allSettled(jobs);
+}
+
 // 手機切到別的App再回來：離開超過10分鐘就自動更新全部資料；離開時順便停掉雷達動畫
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopRadar_(); return; }
   if (radarShouldPlay_() && radarFrames) startRadar_(); // 回前景繼續播放
   if (Date.now() - lastRefreshAt < 10 * 60 * 1000) return;
-  lastRefreshAt = Date.now();
-  loadTodayWeather(); loadHourlyForecast(); loadAlerts(); loadEarthquake();
-  weeklyStale = true;
-  if (currentTab === 'weekly') loadWeeklyForecast();
-  if (radarShouldPlay_()) loadRadarNowcast();
+  reloadAll_();
 });
 
 // 頁面開著不關（例如教室螢幕）：每10分鐘檢查，整點或日期變了就重載今日與逐時，
 // 「現在」欄、日期、農曆、日出日落才不會停在舊時間
-function reloadTodayData_() {
-  lastRefreshAt = Date.now();
-  loadTodayWeather();
-  loadHourlyForecast();
-  weeklyStale = true;
-  if (currentTab === 'weekly') loadWeeklyForecast();
-}
 setInterval(() => {
   if (document.hidden || !hourlyLoadedKey_ || tickKey_() === hourlyLoadedKey_) return;
-  reloadTodayData_();
+  reloadAll_();
 }, 10 * 60 * 1000);
 
 // ==================== 地圖子分頁切換 ====================
-/** 第三方地圖 iframe：第一次看到才載入，離開「即時地圖」分頁就清空（停掉背景連線與計時器），回來時重新載入 */
-function loadVisibleMapFrames_() {
-  ['aqimap', 'airbox'].forEach(key => {
+/**
+ * 第三方地圖 iframe（data-src 存網址）：只有「看得到的」才載入，看不到的立刻清成 about:blank（停掉背景連線與計時器）。
+ * 看得到＝目前在「即時地圖」分頁，且該子分頁沒被 hidden；inMaps=false 代表離開地圖分頁，全部卸載。
+ */
+const MAP_FRAME_KEYS_ = ['aqimap', 'airbox']; // 對應 #map-<key>-view 內的 iframe
+function syncMapFrames_(inMaps) {
+  MAP_FRAME_KEYS_.forEach(key => {
     const view = document.getElementById(`map-${key}-view`), f = view && view.querySelector('iframe');
-    if (f && !view.classList.contains('hidden') && f.getAttribute('src') !== f.dataset.src) f.src = f.dataset.src;
+    if (!f) return;
+    const src = f.getAttribute('src');
+    if (inMaps && !view.classList.contains('hidden')) {
+      if (src !== f.dataset.src) { f.src = f.dataset.src; setMapFrameStatus_(key, true); }
+    } else if (src && src !== 'about:blank') {
+      f.src = 'about:blank';
+    }
   });
 }
-function unloadMapFrames_() {
-  document.querySelectorAll('#map-aqimap-view iframe, #map-airbox-view iframe').forEach(f => { if (f.getAttribute('src')) f.src = 'about:blank'; });
+/** iframe 載入中提示：載入前顯示「載入中…」，load 事件後隱藏 */
+function setMapFrameStatus_(key, loading) {
+  const el = document.getElementById(`map-${key}-loading`);
+  if (el) el.classList.toggle('hidden', !loading);
 }
+MAP_FRAME_KEYS_.forEach(key => {
+  const f = document.querySelector(`#map-${key}-view iframe`);
+  if (f) f.addEventListener('load', () => { if (f.getAttribute('src') !== 'about:blank') setMapFrameStatus_(key, false); });
+});
 function switchMapSubTab(subTab) {
   const keys = ['rainhelper', 'aqimap', 'airbox'];
   keys.forEach(key => {
@@ -1687,13 +1735,15 @@ function switchMapSubTab(subTab) {
     const btn = document.getElementById(`subtab-${key}`);
     if (key === subTab) {
       view.classList.remove('hidden');
+      btn.setAttribute('aria-current', 'true');
       btn.className = "px-4 py-1.5 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark";
     } else {
       view.classList.add('hidden');
+      btn.removeAttribute('aria-current');
       btn.className = "px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight";
     }
   });
-  loadVisibleMapFrames_();
+  syncMapFrames_(true); // 變隱藏的卸載、變可見的載入
   if (subTab === 'rainhelper') {
     if (!radarFrames) loadRadarNowcast(); else startRadar_();
   } else {
@@ -1846,7 +1896,7 @@ function toggleAlertList() {
 
 // 判斷特報影響地區清單裡的某一筆，是不是使用者目前所在的縣市（統一「台/臺」寫法，以縣市全名開頭比對，避免新竹縣/新竹市誤判）
 function isMyCounty_(loc) {
-  return String(loc || '').replace(/臺/g, '台').startsWith(currentCounty);
+  return normCounty_(loc).startsWith(normCounty_(currentCounty));
 }
 
 // 特報詳情的「影響地區」區塊：豪雨系列/陸上強風/濃霧有完整縣市清單；低溫/高溫是文字推測清單；颱風只提示是否涵蓋你的縣市
@@ -1872,7 +1922,7 @@ function openAlertDetail(i) {
     <p>${escapeHtml_(a.description)}</p>
     ${a.instruction ? `<p class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark"><strong>防護建議：</strong>${escapeHtml_(a.instruction)}</p>` : ''}
     ${renderAlertAreas_(a)}
-    ${a.web ? `<p class="pt-2"><a href="${escapeHtml_(a.web)}" target="_blank" rel="noopener" class="text-muji-accentLight dark:text-muji-accentDark underline">查看官方詳情</a></p>` : ''}`;
+    ${/^https?:\/\//i.test(a.web || '') ? `<p class="pt-2"><a href="${escapeHtml_(a.web)}" target="_blank" rel="noopener" class="text-muji-accentLight dark:text-muji-accentDark underline">查看官方詳情</a></p>` : ''}`;
   showModal_('alert-detail-modal', 'alert-detail-container');
 }
 function closeAlertDetail() { hideModal_('alert-detail-modal', 'alert-detail-container'); }
@@ -1967,17 +2017,20 @@ function setEqBorder_(intensity, originTime) {
   EQ_BORDER_ALL_.forEach(c => card.classList.remove(c));
   const idx = INTENSITY_ORDER_.indexOf(intensity);
   const ot = parseCwaTime_(originTime), old = !ot || nowWallMs_() - ot.ms > 24 * 3600000; // 超過24小時不再用顏色提醒
-  const cls = old ? ALERT_BORDER_NEUTRAL_ : idx >= 7 ? ['border-l-red-500'] : idx >= 5 ? ['border-l-orange-500'] : idx >= 3 ? ['border-l-yellow-500'] : ALERT_BORDER_NEUTRAL_;
+  const lv = name => INTENSITY_ORDER_.indexOf(name);
+  const cls = old ? ALERT_BORDER_NEUTRAL_ : idx >= lv('6弱') ? ['border-l-red-500'] : idx >= lv('5弱') ? ['border-l-orange-500'] : idx >= lv('3級') ? ['border-l-yellow-500'] : ALERT_BORDER_NEUTRAL_;
   cls.forEach(c => card.classList.add(c));
 }
 
 function renderEarthquakeList() {
-  const row = (eq, i) => {
+  const row = (eq, i, showLocal) => {
     const mi = maxIntensity_(eq.areas);
+    const local = showLocal ? localIntensity_(eq.areas) : null;
+    const localTag = showLocal ? `<span class="block text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">${local ? '本地 ' + escapeHtml_(local) : '本地無震度'}</span>` : '';
     return `<button type="button" onclick="openEarthquakeDetail(${i})" aria-haspopup="dialog" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
       <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-xs font-bold ${MAGNITUDE_BADGE_CLS_}"><span class="sr-only">規模 </span>M${escapeHtml_(eq.magnitude)}</span>
-      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">最大震度 </span>${escapeHtml_(mi)}</span>
-      <span class="flex-1 min-w-0 truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
+      <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">全台最大震度 </span>${escapeHtml_(mi)}</span>
+      <span class="flex-1 min-w-0"><span class="block truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>${localTag}</span>
       <span class="text-muji-textMutedLight dark:text-muji-textMutedDark shrink-0 text-right leading-tight text-xs">
         <span class="block">${escapeHtml_(relativeTime_(eq.originTime))}</span>
         <span class="block text-xs">${escapeHtml_((eq.originTime || '').slice(5))}</span>
@@ -1986,9 +2039,9 @@ function renderEarthquakeList() {
   };
   // 收合時只顯示最新一筆；展開後顯示完整清單（最新一筆在清單內，所以展開時隱藏摘要）
   setText_('eq-count', `近 ${latestEarthquakeData.length} 筆`);
-  document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0);
+  document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0, true);
   applyEqLocal_();
-  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map(row).join('');
+  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map((eq, i) => row(eq, i, false)).join('');
 }
 
 function toggleEarthquakeList() {
@@ -2084,6 +2137,7 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
 
     function updateHeaderLocation() {
       document.getElementById('header-location-text').textContent = `${currentCounty}${currentTownship}`;
+      document.getElementById('header-location-btn').setAttribute('aria-label', `變更地點，目前：${currentCounty}${currentTownship}`);
     }
 
     async function loadTownships() {
@@ -2114,10 +2168,12 @@ function switchLocation(county, township) {
   lsSet_('muji_county', county);
   lsSet_('muji_township', township);
   updateHeaderLocation();
+  setText_('loc-announce', `已切換到${county}${township}`); // 常駐播報區：視窗開著或關著都唸得到
   hourlyCache = null;
   document.getElementById('alert-card').classList.add('hidden'); // 先藏起上一個地點的特報，等新地點結果再決定要不要顯示
   lastRefreshAt = Date.now();
   currentLocationLatLng = null;
+  // 地震不重抓（全站共用），只依新地點重算色條；其餘依地點的資料一律重載
   loadTodayWeather();
   loadHourlyForecast();
   loadAlerts();
@@ -2136,6 +2192,8 @@ function switchLocation(county, township) {
       toggleLocationModal(false);
     }
 
+    const GEO_TIMEOUT_MS_ = 10000, GEO_MAX_AGE_MS_ = 300000; // 定位逾時 10 秒；5 分鐘內的快取位置可沿用
+    const isModalOpen_ = () => !document.getElementById('location-modal').hasAttribute('inert');
     function useCurrentLocation() {
       const statusEl = document.getElementById('location-status');
       const btn = document.getElementById('btn-geolocate');
@@ -2143,8 +2201,9 @@ function switchLocation(county, township) {
         statusEl.textContent = '不支援定位';
         return;
       }
-      const modalOpen = () => !document.getElementById('location-modal').hasAttribute('inert'); // 視窗已關閉就不要再默默換地點
-      const setBusy = on => { btn.disabled = on; btn.classList.toggle('opacity-50', on); };
+      const modalOpen = isModalOpen_; // 視窗已關閉就不要再默默換地點
+      if (btn.getAttribute('aria-disabled') === 'true') return; // 忙碌中：重複按不處理（用 aria-disabled，焦點才不會跳掉）
+      const setBusy = on => { btn.setAttribute('aria-disabled', String(on)); btn.classList.toggle('opacity-50', on); };
       setBusy(true);
       statusEl.textContent = '定位中…';
       navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -2158,13 +2217,12 @@ function switchLocation(county, township) {
           return;
         }
         switchLocation(res.county, res.township);
-        statusEl.textContent = `已定位：${res.county}${res.township}`;
-        setTimeout(() => { if (modalOpen()) toggleLocationModal(false); }, 1000);
+        statusEl.textContent = `已定位：${res.county}${res.township}，可按關閉返回`; // 不自動關窗，由使用者關閉；切換結果另由常駐播報區唸出
       }, (err) => {
         setBusy(false);
         const GEO_ERR_MSG = { 1: '未授權定位', 2: '無法取得位置', 3: '定位逾時' };
         if (modalOpen()) statusEl.textContent = `${GEO_ERR_MSG[err.code] || '定位失敗'}，請手動選擇`;
-      }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+      }, { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS_, maximumAge: GEO_MAX_AGE_MS_ });
     }
 
     // ---- 常用地點（localStorage，最多5個） ----
