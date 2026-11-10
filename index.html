@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-08 #3 22:38 重載整併、iframe 卸載修正、地震本地震度、a11y 補強、逐時規則說明、天氣圖示對比 -->
+<!-- 版本：2026-11-10 #1 19:53 壞地點自動退回預設、播報區移出 inert、定位序號、重載失敗恢復、雷達暫停保留、地震本地震度、載入失敗提示 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -88,7 +88,6 @@
       <div class="flex items-center gap-3 shrink-0">
         <img src="favicon.svg" alt="MK天氣" class="w-8 h-8 rounded-full">
         <div>
-          <span id="loc-announce" role="status" aria-live="polite" class="sr-only"></span>
           <h1 tabindex="-1" class="text-base sm:text-lg font-bold tracking-wide">天氣預報</h1>
           <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark flex items-center gap-2">
             <button type="button" onclick="toggleLocationModal(true)" id="header-location-btn" aria-label="變更地點" class="hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-colors"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="header-location-text">台中市東區</span></button>
@@ -145,10 +144,10 @@
           <div class="bg-muji-cardLight dark:bg-muji-cardDark border border-muji-borderLight dark:border-muji-borderDark rounded-3xl p-5 sm:p-10 lg:p-6 xl:p-10 shadow-sm flex items-stretch gap-4 sm:gap-8 lg:gap-4 xl:gap-8 lg:flex-1">
             <div class="flex-1 min-w-0 flex flex-col justify-between gap-3 text-left">
               <div class="inline-grid grid-cols-1 gap-2 w-fit max-w-full">
-                <span id="badge-date" class="text-center px-3 py-1 rounded-full text-xs bg-muji-bgLight dark:bg-muji-bgDark text-muji-textMutedLight dark:text-muji-textMutedDark border border-muji-borderLight dark:border-muji-borderDark">
+                <span id="badge-date" class="text-center px-2 sm:px-3 py-1 rounded-full text-xs bg-muji-bgLight dark:bg-muji-bgDark text-muji-textMutedLight dark:text-muji-textMutedDark border border-muji-borderLight dark:border-muji-borderDark">
                   載入中...
                 </span>
-                <span id="badge-lunar" class="text-center whitespace-nowrap px-3 py-1 rounded-full text-xs bg-muji-bgLight dark:bg-muji-bgDark text-muji-textMutedLight dark:text-muji-textMutedDark border border-muji-borderLight dark:border-muji-borderDark">
+                <span id="badge-lunar" class="text-center whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-xs bg-muji-bgLight dark:bg-muji-bgDark text-muji-textMutedLight dark:text-muji-textMutedDark border border-muji-borderLight dark:border-muji-borderDark">
                   載入中...
                 </span>
               </div>
@@ -243,7 +242,6 @@
     <span class="flex items-center gap-1.5 text-xs font-normal text-muji-textMutedLight dark:text-muji-textMutedDark"><i id="eq-chevron" class="fa-solid fa-chevron-down transition-transform duration-300" aria-hidden="true"></i></span>
   </button></h2>
   <div id="eq-latest" class="mt-3 text-sm"></div>
-  <span id="eq-local-sr" class="sr-only"></span>
   <div id="earthquake-list" class="hidden pt-3 mt-3 border-t border-muji-borderLight dark:border-muji-borderDark text-sm space-y-1"></div>
 </div>
       </div>
@@ -309,7 +307,7 @@
       <i class="fa-solid fa-play text-xs" aria-hidden="true"></i>
     </button>
     <div class="flex-1">
-      <input type="range" id="radar-slider" aria-label="雷達回波時間軸" min="0" max="6" value="0" step="1" class="w-full" oninput="stopRadar_(); setRadarFrame(this.value)">
+      <input type="range" id="radar-slider" aria-label="雷達回波時間軸" min="0" max="6" value="0" step="1" class="w-full" oninput="radarUserPaused_ = true; stopRadar_(); setRadarFrame(this.value)">
       <div class="relative h-4 mx-2 text-xs text-muji-textMutedLight dark:text-muji-textMutedDark" aria-hidden="true"><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:0.000%">0分</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:16.667%">10</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:33.333%">20</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:50.000%">30</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:66.667%">40</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:83.333%">50</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:100.000%">60分</span></div>
     </div>
       </div>
@@ -321,13 +319,13 @@
 
           <div id="map-aqimap-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
             <a href="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" target="_blank" rel="noopener" aria-label="開啟空品地圖官方頁面（另開新分頁）" title="開啟空品地圖官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
-            <p id="map-aqimap-loading" role="status" class="hidden absolute inset-0 flex items-center justify-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none">載入中…</p>
+            <p id="map-aqimap-loading" role="status" class="absolute inset-x-0 top-1/2 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none"></p>
             <iframe data-src="https://watch.ncdr.nat.gov.tw/watch_pm25_earth" class="w-full h-full border-0" title="空品地圖"></iframe>
           </div>
 
           <div id="map-airbox-view" class="w-full rounded-2xl overflow-hidden hidden relative" style="height:calc(100vh - 260px);height:calc(100dvh - 260px)">
             <a href="https://airbox.edimaxcloud.com/" target="_blank" rel="noopener" aria-label="開啟空氣盒子官方頁面（另開新分頁）" title="開啟空氣盒子官方頁面（另開新分頁）" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-muji-cardLight/90 dark:bg-muji-cardDark/90 border border-muji-borderLight dark:border-muji-borderDark flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
-            <p id="map-airbox-loading" role="status" class="hidden absolute inset-0 flex items-center justify-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none">載入中…</p>
+            <p id="map-airbox-loading" role="status" class="absolute inset-x-0 top-1/2 text-center text-xs text-muji-textMutedLight dark:text-muji-textMutedDark pointer-events-none"></p>
             <iframe data-src="https://airbox.edimaxcloud.com/" class="w-full h-full border-0" title="空氣盒子"></iframe>
           </div>
         </div>
@@ -356,6 +354,9 @@
       <span class="text-xs font-medium">即時地圖</span>
     </button>
   </div>
+
+  <!-- 常駐播報區：放在 header／main 之外，開窗（背景 inert）時也唸得到 -->
+  <div id="loc-announce" role="status" aria-live="polite" class="sr-only"></div>
 
   <!-- 回到頁首：捲動超過一屏才顯示；手機版避開底部導覽列 -->
   <button type="button" id="btn-top" inert onclick="scrollToTop_()" aria-label="回到頁首" title="回到頁首" class="fixed right-4 z-40 w-10 h-10 rounded-full bg-muji-cardLight/95 dark:bg-muji-cardDark/95 border border-muji-borderLight dark:border-muji-borderDark shadow-md flex items-center justify-center text-muji-textMutedLight dark:text-muji-textMutedDark hover:text-muji-textPrimaryLight dark:hover:text-muji-textPrimaryDark transition-opacity duration-300 opacity-0 pointer-events-none lg:bottom-6" style="bottom:calc(4.75rem + env(safe-area-inset-bottom))">
@@ -669,13 +670,23 @@
       try {
         const res = await fetch(`${GAS_BASE_URL}?${usp.toString()}`, { signal: ctrl.signal });
         if (!res.ok) return { ok: false, error: `伺服器回應異常（狀態碼${res.status}）`, networkError: true };
-        return await res.json();
+        const j = await res.json();
+        if (j && j.badParam && params && params.county === currentCounty) onBadLocation_();
+        return j;
       } catch (err) {
         const timeout = err && err.name === 'AbortError';
         return { ok: false, error: timeout ? '連線逾時，請稍後重試' : '網路連線異常，請確認網路後重試', networkError: true };
       } finally {
         clearTimeout(timer);
       }
+    }
+
+    /** 後端回 badParam＝目前存的地點不合法（localStorage 被改過或清單改名）：清掉設定、退回預設地點並提示 */
+    function onBadLocation_() {
+      if (currentCounty === FALLBACK_COUNTY && currentTownship === FALLBACK_TOWNSHIP) return; // 預設值本身不會壞，避免無限重試
+      try { localStorage.removeItem('muji_county'); localStorage.removeItem('muji_township'); } catch (e) { /* 略過 */ }
+      switchLocation(FALLBACK_COUNTY, FALLBACK_TOWNSHIP);
+      setTimeout(() => announce_('地點資料無效，已改回預設地點，可從地點設定重新選擇'), 200);
     }
 
     /** 把CWA/NCDR等外部來源文字轉義後才塞進innerHTML，防禦性寫法（來源雖可信但不假設內容一定乾淨） */
@@ -869,6 +880,7 @@ function wxIconInfo(text, isNight) {
       const old = !!(pt && nowWallMs_() - pt.ms > AQI_STALE_MS_);
       const numEl = document.getElementById('val-aqi-num');
       numEl.textContent = bad ? '--' : a.aqi;
+      numEl.setAttribute('aria-hidden', String(bad)); // 沒有數值時「--」不要被唸成破折號，由旁邊的「暫無有效資料」說明
       numEl.classList.toggle('opacity-70', old);
       const statusEl = document.getElementById('val-aqi-status');
       if (lv.full && lv.full !== lv.label) statusEl.innerHTML = `<span aria-hidden="true">${lv.label}</span><span class="sr-only">${lv.full}</span>`;
@@ -1516,11 +1528,12 @@ async function loadRadarNowcast() {
     img.classList.remove('hidden');
     loadingText.classList.add('hidden');
     document.getElementById('radar-slider').max = radarFrames.length - 1;
-    setRadarFrame(0);
+    const keepIdx = radarUserPaused_ ? Math.min(parseInt(document.getElementById('radar-slider').value, 10) || 0, radarFrames.length - 1) : 0;
+    setRadarFrame(keepIdx); // 暫停中重載：停在原本看的那一格
     await getLatLng_();
     updateRadarMarker();
     centerRadarMarker_();
-    if (radarShouldPlay_()) startRadar_();
+    if (radarShouldPlay_() && !radarUserPaused_) startRadar_();
   } finally {
     radarLoading = false;
   }
@@ -1594,7 +1607,9 @@ function startRadar_() {
   }, 800);
 }
 
+let radarUserPaused_ = false; // 使用者按暫停或拖時間軸後為 true：自動重載、回前景不再擅自繼續播放
 function toggleRadarPlay() {
+  radarUserPaused_ = radarPlaying;
   if (radarPlaying) stopRadar_(); else startRadar_();
 }
 
@@ -1637,7 +1652,8 @@ function switchTab(tabKey) {
 
   if (tabKey === 'today') {
     hourPinned_ = null; onHourScroll_(); // 分頁隱藏時瀏覽器會把長條捲回起點，重新依位置亮起日期按鈕
-    if (hourlyLoadedKey_ && tickKey_() !== hourlyLoadedKey_) reloadAll_(); // 離開期間整點已過
+    // 離開期間整點已過（或一直沒載入成功）才重載；60 秒內剛試過就不再打，上游失敗時來回切分頁不會每次重發整批請求
+    if ((!hourlyLoadedKey_ || tickKey_() !== hourlyLoadedKey_) && Date.now() - lastRefreshAt > 60 * 1000) reloadAll_();
   }
 
   if (tabKey === 'weekly' && weeklyStale) loadWeeklyForecast();
@@ -1656,6 +1672,7 @@ let refreshingTab = false;
 async function refreshCurrentTab() {
   if (refreshingTab) return;
   refreshingTab = true;
+  weeklyCache_ = null; // 手動重新整理要真的重抓，不吃 5 分鐘共用快取
   const icon = document.getElementById('refresh-icon');
   const btn = document.getElementById('btn-refresh');
   btn.disabled = true;
@@ -1689,7 +1706,7 @@ function reloadAll_() {
 // 手機切到別的App再回來：離開超過10分鐘就自動更新全部資料；離開時順便停掉雷達動畫
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopRadar_(); return; }
-  if (radarShouldPlay_() && radarFrames) startRadar_(); // 回前景繼續播放
+  if (radarShouldPlay_() && radarFrames && !radarUserPaused_) startRadar_(); // 回前景繼續播放（使用者暫停過就不擅自播放）
   if (Date.now() - lastRefreshAt < 10 * 60 * 1000) return;
   reloadAll_();
 });
@@ -1697,7 +1714,9 @@ document.addEventListener('visibilitychange', () => {
 // 頁面開著不關（例如教室螢幕）：每10分鐘檢查，整點或日期變了就重載今日與逐時，
 // 「現在」欄、日期、農曆、日出日落才不會停在舊時間
 setInterval(() => {
-  if (document.hidden || !hourlyLoadedKey_ || tickKey_() === hourlyLoadedKey_) return;
+  // 逐時從沒載入成功（hourlyLoadedKey_ 為空）或整點已過，且距上次嘗試超過約 10 分鐘就重載；以「上次嘗試」計時，失敗也不會狂打
+  const stale = !hourlyLoadedKey_ || tickKey_() !== hourlyLoadedKey_;
+  if (document.hidden || !stale || Date.now() - lastRefreshAt < 9 * 60 * 1000) return;
   reloadAll_();
 }, 10 * 60 * 1000);
 
@@ -1713,20 +1732,23 @@ function syncMapFrames_(inMaps) {
     if (!f) return;
     const src = f.getAttribute('src');
     if (inMaps && !view.classList.contains('hidden')) {
-      if (src !== f.dataset.src) { f.src = f.dataset.src; setMapFrameStatus_(key, true); }
+      if (src !== f.dataset.src) { f.src = f.dataset.src; setMapFrameStatus_(key, 'loading'); }
     } else if (src && src !== 'about:blank') {
       f.src = 'about:blank';
+      setMapFrameStatus_(key, '');
     }
   });
 }
-/** iframe 載入中提示：載入前顯示「載入中…」，load 事件後隱藏 */
-function setMapFrameStatus_(key, loading) {
-  const el = document.getElementById(`map-${key}-loading`);
-  if (el) el.classList.toggle('hidden', !loading);
+/** iframe 載入狀態：元素常駐（讀屏才會唸出文字變化），'loading'＝載入中…、'fail'＝逾時提示、''＝清空。逾時 MAP_FRAME_TIMEOUT_MS_ 仍沒 load 就顯示失敗提示 */
+const MAP_FRAME_TIMEOUT_MS_ = 10000, mapFrameTimers_ = {};
+function setMapFrameStatus_(key, state) {
+  clearTimeout(mapFrameTimers_[key]);
+  setText_(`map-${key}-loading`, state === 'loading' ? '載入中…' : state === 'fail' ? '無法載入，請用右上角連結開啟官方頁面' : '');
+  if (state === 'loading') mapFrameTimers_[key] = setTimeout(() => setMapFrameStatus_(key, 'fail'), MAP_FRAME_TIMEOUT_MS_);
 }
 MAP_FRAME_KEYS_.forEach(key => {
   const f = document.querySelector(`#map-${key}-view iframe`);
-  if (f) f.addEventListener('load', () => { if (f.getAttribute('src') !== 'about:blank') setMapFrameStatus_(key, false); });
+  if (f) f.addEventListener('load', () => setMapFrameStatus_(key, ''));
 });
 function switchMapSubTab(subTab) {
   const keys = ['rainhelper', 'aqimap', 'airbox'];
@@ -1824,6 +1846,12 @@ function setAlertBorder_(list) {
 let currentAlertsData = null;
 let alertSeq = 0;
 
+/** 內容沒變就不重寫：alert-top 是 role=status，每次重寫都會讓讀屏再唸一次同一則特報（自動重載時尤其擾人） */
+function setHtmlIfChanged_(el, html) {
+  if (el.dataset.html === html) return;
+  el.dataset.html = html;
+  el.innerHTML = html;
+}
 function alertBadgeHtml_(a) {
   const lv = a.color ? '・' + String(a.color).replace('色', '') : ''; // 等級併進膠囊，例如「大雨・黃」；沒有等級的只顯示名稱，固定寬度讓標題對齊
   const cls = !a.color && a.type === '颱風' ? ALERT_COLOR_MAP_['橙色'] : alertColorCls_(a.color); // 颱風沒有等級顏色時固定橘色
@@ -1840,7 +1868,7 @@ function showAlertNotice_(html) {
   document.getElementById('alert-chevron').classList.add('hidden');
   document.getElementById('alert-list').classList.add('hidden');
   document.getElementById('alert-top').classList.remove('hidden');
-  document.getElementById('alert-top').innerHTML = html;
+  setHtmlIfChanged_(document.getElementById('alert-top'), html);
 }
 
 async function loadAlerts() {
@@ -1868,7 +1896,7 @@ async function loadAlerts() {
   const top = list[0];
   const topEl = document.getElementById('alert-top');
   topEl.classList.remove('hidden');
-  topEl.innerHTML = `<button type="button" onclick="openAlertDetail(0)" aria-haspopup="dialog" class="w-full flex items-center gap-2 text-left">${alertBadgeHtml_(top)}<span class="flex-1 min-w-0 truncate">${escapeHtml_(top.headline)}</span></button>${partialNote}`;
+  setHtmlIfChanged_(topEl, `<button type="button" onclick="openAlertDetail(0)" aria-haspopup="dialog" class="w-full flex items-center gap-2 text-left">${alertBadgeHtml_(top)}<span class="flex-1 min-w-0 truncate">${escapeHtml_(top.headline)}</span></button>${partialNote}`);
   renderAlertList();
   // 重新載入後維持收合狀態
   document.getElementById('alert-list').classList.add('hidden');
@@ -2009,7 +2037,6 @@ function applyEqLocal_() {
   if (!latestEarthquakeData || latestEarthquakeData.length === 0) return;
   const eq = latestEarthquakeData[0], local = localIntensity_(eq.areas);
   setEqBorder_(local, eq.originTime);
-  setText_('eq-local-sr', local ? `最新一筆在${currentCounty}的震度為${local}` : `最新一筆在${currentCounty}沒有震度紀錄`);
 }
 const EQ_BORDER_ALL_ = ['border-l-yellow-500', 'border-l-orange-500', 'border-l-red-500', ...ALERT_BORDER_NEUTRAL_];
 function setEqBorder_(intensity, originTime) {
@@ -2023,10 +2050,10 @@ function setEqBorder_(intensity, originTime) {
 }
 
 function renderEarthquakeList() {
-  const row = (eq, i, showLocal) => {
+  const row = (eq, i) => {
     const mi = maxIntensity_(eq.areas);
-    const local = showLocal ? localIntensity_(eq.areas) : null;
-    const localTag = showLocal ? `<span class="block text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">${local ? '本地 ' + escapeHtml_(local) : '本地無震度'}</span>` : '';
+    const local = localIntensity_(eq.areas);
+    const localTag = `<span class="block text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">${local ? '本地震度 ' + escapeHtml_(local) : '本地無震度'}</span>`;
     return `<button type="button" onclick="openEarthquakeDetail(${i})" aria-haspopup="dialog" class="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
       <span class="shrink-0 w-12 text-center py-0.5 rounded-md text-xs font-bold ${MAGNITUDE_BADGE_CLS_}"><span class="sr-only">規模 </span>M${escapeHtml_(eq.magnitude)}</span>
       <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(mi)}"><span class="sr-only">全台最大震度 </span>${escapeHtml_(mi)}</span>
@@ -2039,9 +2066,9 @@ function renderEarthquakeList() {
   };
   // 收合時只顯示最新一筆；展開後顯示完整清單（最新一筆在清單內，所以展開時隱藏摘要）
   setText_('eq-count', `近 ${latestEarthquakeData.length} 筆`);
-  document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0, true);
+  document.getElementById('eq-latest').innerHTML = row(latestEarthquakeData[0], 0);
   applyEqLocal_();
-  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map((eq, i) => row(eq, i, false)).join('');
+  document.getElementById('earthquake-list').innerHTML = latestEarthquakeData.map(row).join('');
 }
 
 function toggleEarthquakeList() {
@@ -2062,7 +2089,7 @@ function openEarthquakeDetail(i) {
     <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark ml-1">#${escapeHtml_(eq.earthquakeNo)}</span>`;
 
   const groupLines = groupByIntensity_(eq.areas).map(g => {
-    const counties = g.counties.map(c => c === currentCounty ? `<strong class="text-muji-accentLight dark:text-muji-accentDark">📍${escapeHtml_(c)}</strong>` : escapeHtml_(c));
+    const counties = g.counties.map(c => normCounty_(c) === normCounty_(currentCounty) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark"><span aria-hidden="true">📍</span>${escapeHtml_(c)}<span class="sr-only">（你的所在縣市）</span></strong>` : escapeHtml_(c));
     return `<div class="flex items-start gap-2">
       <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
       <span class="flex-1">${counties.join('、')}</span>
@@ -2129,12 +2156,20 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
       if (show) {
         showModal_('location-modal', 'location-modal-container');
         document.getElementById('location-status').textContent = '';
+        geoSeq_++; // 作廢上一次還沒回來的定位，並重置按鈕（iOS 授權窗不回應時才不會卡在忙碌）
+        const gb = document.getElementById('btn-geolocate');
+        gb.setAttribute('aria-disabled', 'false'); gb.classList.remove('opacity-50');
         if (!townshipsData) loadTownships();
       } else {
         hideModal_('location-modal', 'location-modal-container');
       }
     }
 
+    /** 播報：先清空再寫入，同一句連續出現也會再唸一次 */
+    function announce_(msg) {
+      setText_('loc-announce', '');
+      setTimeout(() => setText_('loc-announce', msg), 60);
+    }
     function updateHeaderLocation() {
       document.getElementById('header-location-text').textContent = `${currentCounty}${currentTownship}`;
       document.getElementById('header-location-btn').setAttribute('aria-label', `變更地點，目前：${currentCounty}${currentTownship}`);
@@ -2168,7 +2203,7 @@ function switchLocation(county, township) {
   lsSet_('muji_county', county);
   lsSet_('muji_township', township);
   updateHeaderLocation();
-  setText_('loc-announce', `已切換到${county}${township}`); // 常駐播報區：視窗開著或關著都唸得到
+  announce_(`已切換到${county}${township}`);
   hourlyCache = null;
   document.getElementById('alert-card').classList.add('hidden'); // 先藏起上一個地點的特報，等新地點結果再決定要不要顯示
   lastRefreshAt = Date.now();
@@ -2192,6 +2227,7 @@ function switchLocation(county, township) {
       toggleLocationModal(false);
     }
 
+    let geoSeq_ = 0; // 定位序號：重開視窗或再次定位後，舊的回呼直接丟棄（不會默默換地點，也不會卡住忙碌旗標）
     const GEO_TIMEOUT_MS_ = 10000, GEO_MAX_AGE_MS_ = 300000; // 定位逾時 10 秒；5 分鐘內的快取位置可沿用
     const isModalOpen_ = () => !document.getElementById('location-modal').hasAttribute('inert');
     function useCurrentLocation() {
@@ -2205,11 +2241,15 @@ function switchLocation(county, township) {
       if (btn.getAttribute('aria-disabled') === 'true') return; // 忙碌中：重複按不處理（用 aria-disabled，焦點才不會跳掉）
       const setBusy = on => { btn.setAttribute('aria-disabled', String(on)); btn.classList.toggle('opacity-50', on); };
       setBusy(true);
+      const mySeq = ++geoSeq_;
       statusEl.textContent = '定位中…';
       navigator.geolocation.getCurrentPosition(async (pos) => {
+        if (mySeq !== geoSeq_) return;
         const { latitude, longitude } = pos.coords;
         statusEl.textContent = '查詢中…';
-        const res = await fetchGas('geolocate', { lat: latitude, lng: longitude });
+        // 座標只用來查行政區，降到小數 2 位（約 1 公里）再送出，不儲存
+        const res = await fetchGas('geolocate', { lat: latitude.toFixed(2), lng: longitude.toFixed(2) });
+        if (mySeq !== geoSeq_) return;
         setBusy(false);
         if (!modalOpen()) return;
         if (!res.ok) {
@@ -2219,6 +2259,7 @@ function switchLocation(county, township) {
         switchLocation(res.county, res.township);
         statusEl.textContent = `已定位：${res.county}${res.township}，可按關閉返回`; // 不自動關窗，由使用者關閉；切換結果另由常駐播報區唸出
       }, (err) => {
+        if (mySeq !== geoSeq_) return;
         setBusy(false);
         const GEO_ERR_MSG = { 1: '未授權定位', 2: '無法取得位置', 3: '定位逾時' };
         if (modalOpen()) statusEl.textContent = `${GEO_ERR_MSG[err.code] || '定位失敗'}，請手動選擇`;
@@ -2227,7 +2268,7 @@ function switchLocation(county, township) {
 
     // ---- 常用地點（localStorage，最多5個） ----
     function getFavorites() {
-      try { return JSON.parse(lsGet_('muji_favorites') || '[]'); } catch (e) { return []; }
+      try { const v = JSON.parse(lsGet_('muji_favorites') || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } // 合法 JSON 但不是陣列（null、物件）也退回空清單
     }
     function saveFavorites(list) {
       lsSet_('muji_favorites', JSON.stringify(list));
