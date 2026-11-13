@@ -1,4 +1,4 @@
-<!-- 版本：2026-11-10 #1 19:53 壞地點自動退回預設、播報區移出 inert、定位序號、重載失敗恢復、雷達暫停保留、地震本地震度、載入失敗提示 -->
+<!-- 版本：2026-11-13 #1 08:38 地震換地點即時更新、地震列精簡、註解改寫成現況、地圖子分頁 hover、特報單則不顯示數量、地點圖示改線條、分頁名統一 -->
 <!DOCTYPE html>
 <html lang="zh-TW" class="light">
 <head>
@@ -103,7 +103,7 @@
           <i class="fa-solid fa-sun mr-1.5 opacity-80" aria-hidden="true"></i>今日天氣
         </button>
         <button onclick="switchTab('weekly')" id="tab-weekly-desktop" class="nav-tab px-5 py-2 rounded-xl text-sm font-medium transition-all shrink-0 text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
-          <i class="fa-solid fa-calendar-days mr-1.5 opacity-80" aria-hidden="true"></i>一週趨勢
+          <i class="fa-solid fa-calendar-days mr-1.5 opacity-80" aria-hidden="true"></i>一週預報
         </button>
         <button onclick="switchTab('maps')" id="tab-maps-desktop" class="nav-tab px-5 py-2 rounded-xl text-sm font-medium transition-all shrink-0 text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
           <i class="fa-solid fa-map-location-dot mr-1.5 opacity-80" aria-hidden="true"></i>即時地圖
@@ -278,10 +278,10 @@
           <button onclick="switchMapSubTab('rainhelper')" id="subtab-rainhelper" aria-current="true" class="px-4 py-1.5 rounded-full text-xs font-medium bg-muji-textPrimaryLight dark:bg-muji-textPrimaryDark text-muji-bgLight dark:text-muji-bgDark">
             落雨小幫手
           </button>
-          <button onclick="switchMapSubTab('aqimap')" id="subtab-aqimap" class="px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight">
+          <button onclick="switchMapSubTab('aqimap')" id="subtab-aqimap" class="px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
             空品地圖
           </button>
-          <button onclick="switchMapSubTab('airbox')" id="subtab-airbox" class="px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight">
+          <button onclick="switchMapSubTab('airbox')" id="subtab-airbox" class="px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark">
             空氣盒子
           </button>
         </div>
@@ -311,8 +311,7 @@
       <div class="relative h-4 mx-2 text-xs text-muji-textMutedLight dark:text-muji-textMutedDark" aria-hidden="true"><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:0.000%">0分</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:16.667%">10</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:33.333%">20</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:50.000%">30</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:66.667%">40</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:83.333%">50</span><span class="absolute -translate-x-1/2 whitespace-nowrap" style="left:100.000%">60分</span></div>
     </div>
       </div>
-  <div class="flex items-center justify-between">
-    <p class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark">未來60分鐘回波</p>
+  <div class="flex items-center justify-end">
     <span id="radar-time-label" class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark tabular-nums">--</span>
   </div>
 </div>
@@ -347,7 +346,7 @@
     </button>
     <button onclick="switchTab('weekly')" id="tab-weekly-mobile" class="nav-tab-mobile flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-muji-textMutedLight dark:text-muji-textMutedDark">
       <i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i>
-      <span class="text-xs font-medium">一週趨勢</span>
+      <span class="text-xs font-medium">一週預報</span>
     </button>
     <button onclick="switchTab('maps')" id="tab-maps-mobile" class="nav-tab-mobile flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-muji-textMutedLight dark:text-muji-textMutedDark">
       <i class="fa-solid fa-map-location-dot text-base" aria-hidden="true"></i>
@@ -669,13 +668,13 @@
       const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
       try {
         const res = await fetch(`${GAS_BASE_URL}?${usp.toString()}`, { signal: ctrl.signal });
-        if (!res.ok) return { ok: false, error: `伺服器回應異常（狀態碼${res.status}）`, networkError: true };
+        if (!res.ok) return { ok: false, error: `伺服器回應異常（狀態碼${res.status}）` };
         const j = await res.json();
         if (j && j.badParam && params && params.county === currentCounty) onBadLocation_();
         return j;
       } catch (err) {
         const timeout = err && err.name === 'AbortError';
-        return { ok: false, error: timeout ? '連線逾時，請稍後重試' : '網路連線異常，請確認網路後重試', networkError: true };
+        return { ok: false, error: timeout ? '連線逾時，請稍後重試' : '網路連線異常，請確認網路後重試' };
       } finally {
         clearTimeout(timer);
       }
@@ -847,7 +846,7 @@ function wxIconInfo(text, isNight) {
 
     /** 空品無效：沒有數值（後端已排除通訊異常、有效數據不足的測站） */
     function aqiInvalid_(a) {
-      return isNaN(parseFloat(a.aqi)); // 「AQI=0 但污染物全空」的判斷已移到後端 getAqi_，前端只看是否為數字
+      return isNaN(parseFloat(a.aqi)); // 有效性（如 AQI=0 且污染物全空）由後端 getAqi_ 判斷，前端只看是否為數字
     }
     /** 明日預報小卡：取一週預報裡明天的白天（06–18）與晚上（18–06）區段，顯示低溫–高溫與天氣圖示 */
     function renderTomorrow_(els) {
@@ -941,7 +940,7 @@ function wxIconInfo(text, isNight) {
       const q = { county: currentCounty, township: currentTownship };
       const showRetry = () => { if (seq === todaySeq) document.getElementById('today-retry').classList.remove('hidden'); };
 
-      // 日出日落與雷達標記要用經緯度：today 回應已帶座標就直接用；沒帶（舊版後端）或失敗才另外查
+      // 日出日落與雷達標記要用經緯度：today 回應已帶座標就直接用；沒帶或失敗才另外查
       const applySun = ll => { if (seq === todaySeq && ll) renderSun_(ll); };
       const pObs = fetchGas('today', q).then(t => {
         if (seq !== todaySeq) return;
@@ -953,7 +952,7 @@ function wxIconInfo(text, isNight) {
       const pTm = fetchWeekly_().then(r => {
         if (seq !== todaySeq) return;
         if (r.ok) renderTomorrow_(r.elements || {});
-        else { setText_('tm-day-sr', '明日預報暫時無法取得'); showRetry(); } // 失敗不再默默顯示「--」，讀屏也聽得到，並出現重試鈕
+        else { setText_('tm-day-sr', '明日預報暫時無法取得'); showRetry(); } // 失敗時顯示說明（讀屏也聽得到）並出現重試鈕
       });
       const pAqi = fetchGas('aqi', q).then(a => {
         if (seq !== todaySeq) return;
@@ -1040,7 +1039,6 @@ function wxIconInfo(text, isNight) {
       const dateRow = runs.map(r => `<div style="grid-column:span ${r.len}" class="pl-2"><span class="sticky left-2 inline-block">${r.len < 2 ? r.label.slice(0, 5) : r.label}</span></div>`).join('');
       const dividers = runs.slice(1).map(r => `<div class="absolute top-0 bottom-0 border-l border-dashed border-muji-textMutedLight/30 dark:border-muji-textMutedDark/30 pointer-events-none" style="left:${r.start * colw}px"></div>`).join('');
 
-      // 日夜底色：連續同一時段合併（凌晨→白天→傍晚夜間）
       const SEG_CLS = {
         m: 'bg-gradient-to-b from-indigo-900/10 to-indigo-900/5 dark:from-indigo-950/40 dark:to-indigo-950/15',
         d: 'bg-amber-500/5',
@@ -1141,7 +1139,7 @@ function wxIconInfo(text, isNight) {
     function setHourTab_(key) {
       if (key === hourActiveKey_) return; // 沒變就不重畫，捲動時每幀都會呼叫
       hourActiveKey_ = key;
-      const tabsEl = document.getElementById('hour-day-tabs'); // 已加 relative，offsetLeft 以此容器為基準
+      const tabsEl = document.getElementById('hour-day-tabs'); // 容器是 relative，offsetLeft 以它為基準
       document.querySelectorAll('.hour-day-tab').forEach(btn => {
         const on = btn.id === `hourtab-${key}`;
         btn.className = HOUR_TAB_BASE_ + (on ? HOUR_TAB_ON_ : HOUR_TAB_OFF_);
@@ -1762,7 +1760,7 @@ function switchMapSubTab(subTab) {
     } else {
       view.classList.add('hidden');
       btn.removeAttribute('aria-current');
-      btn.className = "px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-cardLight";
+      btn.className = "px-4 py-1.5 rounded-full text-xs font-medium text-muji-textMutedLight dark:text-muji-textMutedDark hover:bg-muji-bgLight dark:hover:bg-muji-bgDark";
     }
   });
   syncMapFrames_(true); // 變隱藏的卸載、變可見的載入
@@ -1889,7 +1887,7 @@ async function loadAlerts() {
   currentAlertsData = list;
   document.getElementById('alert-card').classList.remove('hidden');
   setAlertBorder_(list);
-  setText_('alert-count-text', `${list.length}則`);
+  setText_('alert-count-text', list.length >= 2 ? `${list.length}則` : '');
   document.getElementById('alert-chevron').classList.toggle('hidden', list.length < 2); // 只有 1 則時沒有清單可展開，隱藏展開箭頭
   document.getElementById('alert-toggle').disabled = list.length < 2;
   // 收合時：只顯示最高優先權的那一則（含等級文字）；展開才看完整清單
@@ -1898,7 +1896,6 @@ async function loadAlerts() {
   topEl.classList.remove('hidden');
   setHtmlIfChanged_(topEl, `<button type="button" onclick="openAlertDetail(0)" aria-haspopup="dialog" class="w-full flex items-center gap-2 text-left">${alertBadgeHtml_(top)}<span class="flex-1 min-w-0 truncate">${escapeHtml_(top.headline)}</span></button>${partialNote}`);
   renderAlertList();
-  // 重新載入後維持收合狀態
   document.getElementById('alert-list').classList.add('hidden');
   document.getElementById('alert-toggle').setAttribute('aria-expanded', 'false');
   document.getElementById('alert-chevron').classList.remove('rotate-180');
@@ -1930,12 +1927,12 @@ function isMyCounty_(loc) {
 // 特報詳情的「影響地區」區塊：豪雨系列/陸上強風/濃霧有完整縣市清單；低溫/高溫是文字推測清單；颱風只提示是否涵蓋你的縣市
 function renderAlertAreas_(a) {
   if (a.areas && a.areas.length > 0) {
-    const items = a.areas.map(loc => isMyCounty_(loc) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark">📍${escapeHtml_(loc)}</strong>` : escapeHtml_(loc)).join('、');
+    const items = a.areas.map(loc => isMyCounty_(loc) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ${escapeHtml_(loc)}<span class="sr-only">（你的所在縣市）</span></strong>` : escapeHtml_(loc)).join('、');
     const guessNote = a.areasGuessed ? '<span class="text-xs font-normal ml-1 text-muji-textMutedLight dark:text-muji-textMutedDark">（依內文推測）</span>' : '';
     return `<div class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark"><p class="font-bold mb-1">影響地區：${guessNote}</p><p>${items}</p></div>`;
   }
   if (a.coversCounty) {
-    return `<div class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark text-muji-accentLight dark:text-muji-accentDark font-bold">📍 氣象署資料顯示此則特報涵蓋你所在的縣市，詳情請見官方資訊</div>`;
+    return `<div class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark text-muji-accentLight dark:text-muji-accentDark font-bold"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> 氣象署資料顯示此則特報涵蓋你所在的縣市，詳情請見官方資訊</div>`;
   }
   return '';
 }
@@ -2060,7 +2057,6 @@ function renderEarthquakeList() {
       <span class="flex-1 min-w-0"><span class="block truncate">${escapeHtml_(shortLocation_(eq.epicenter))}</span>${localTag}</span>
       <span class="text-muji-textMutedLight dark:text-muji-textMutedDark shrink-0 text-right leading-tight text-xs">
         <span class="block">${escapeHtml_(relativeTime_(eq.originTime))}</span>
-        <span class="block text-xs">${escapeHtml_((eq.originTime || '').slice(5))}</span>
       </span>
     </button>`;
   };
@@ -2085,11 +2081,10 @@ function openEarthquakeDetail(i) {
   document.getElementById('eqd-title').innerHTML = `
     <span class="inline-block px-2 py-0.5 rounded-lg text-sm font-bold ${MAGNITUDE_BADGE_CLS_}">M${escapeHtml_(eq.magnitude)}</span>
     <span class="inline-block px-2 py-0.5 rounded-lg text-sm font-bold ${intensityBadgeCls_(mi)}">${escapeHtml_(mi)}</span>
-    <span class="text-sm font-bold ml-1">${escapeHtml_(shortLocation_(eq.epicenter))}</span>
-    <span class="text-xs text-muji-textMutedLight dark:text-muji-textMutedDark ml-1">#${escapeHtml_(eq.earthquakeNo)}</span>`;
+    <span class="text-sm font-bold ml-1">${escapeHtml_(shortLocation_(eq.epicenter))}</span>`;
 
   const groupLines = groupByIntensity_(eq.areas).map(g => {
-    const counties = g.counties.map(c => normCounty_(c) === normCounty_(currentCounty) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark"><span aria-hidden="true">📍</span>${escapeHtml_(c)}<span class="sr-only">（你的所在縣市）</span></strong>` : escapeHtml_(c));
+    const counties = g.counties.map(c => normCounty_(c) === normCounty_(currentCounty) ? `<strong class="text-muji-accentLight dark:text-muji-accentDark"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ${escapeHtml_(c)}<span class="sr-only">（你的所在縣市）</span></strong>` : escapeHtml_(c));
     return `<div class="flex items-start gap-2">
       <span class="shrink-0 w-10 text-center py-0.5 rounded-md text-xs font-bold ${intensityBadgeCls_(g.intensity)}">${escapeHtml_(g.intensity)}</span>
       <span class="flex-1">${counties.join('、')}</span>
@@ -2101,7 +2096,6 @@ function openEarthquakeDetail(i) {
       <span class="font-bold">發震時間：</span><span>${escapeHtml_(eq.originTime)}（${escapeHtml_(relativeTime_(eq.originTime))}）</span>
       <span class="font-bold">相對位置：</span><span>${escapeHtml_(stripLocationParen_(eq.epicenter))}</span>
       <span class="font-bold">地震深度：</span><span>${escapeHtml_(eq.depth)} 公里</span>
-      <span class="font-bold">${escapeHtml_(eq.magnitudeType || '規模')}：</span><span>${escapeHtml_(eq.magnitude)}</span>
     </div>
     <div class="pt-2 mt-2 border-t border-muji-borderLight dark:border-muji-borderDark space-y-1.5">
       <p class="font-bold">各地震度：</p>
@@ -2196,7 +2190,7 @@ function closeEarthquakeDetail() { hideModal_('earthquake-detail-modal', 'earthq
       townshipSel.innerHTML = list.map(t => `<option value="${escapeHtml_(t)}">${escapeHtml_(t)}</option>`).join('');
     }
 
-    // 換地點：更新狀態、存localStorage、更新標頭、重抓今日/逐時/週報三支API
+    // 換地點：更新狀態、存localStorage、更新標頭、重抓今日／逐時／特報（週報依所在分頁延後載入）
 function switchLocation(county, township) {
   currentCounty = county;
   currentTownship = township;
@@ -2208,7 +2202,7 @@ function switchLocation(county, township) {
   document.getElementById('alert-card').classList.add('hidden'); // 先藏起上一個地點的特報，等新地點結果再決定要不要顯示
   lastRefreshAt = Date.now();
   currentLocationLatLng = null;
-  // 地震不重抓（全站共用），只依新地點重算色條；其餘依地點的資料一律重載
+  // 地震不重抓（全站共用），只用現有資料重畫各列的本地震度與色條；其餘依地點的資料一律重載
   loadTodayWeather();
   loadHourlyForecast();
   loadAlerts();
@@ -2216,7 +2210,7 @@ function switchLocation(county, township) {
   weeklyStale = true;
   if (currentTab === 'weekly') loadWeeklyForecast();
   updateRadarMarker();
-  applyEqLocal_();
+  if (latestEarthquakeData && latestEarthquakeData.length) renderEarthquakeList();
 }
 
     function applySelectedLocation() {
@@ -2257,7 +2251,7 @@ function switchLocation(county, township) {
           return;
         }
         switchLocation(res.county, res.township);
-        statusEl.textContent = `已定位：${res.county}${res.township}，可按關閉返回`; // 不自動關窗，由使用者關閉；切換結果另由常駐播報區唸出
+        statusEl.textContent = `已定位：${res.county}${res.township}`; // 不自動關窗，由使用者關閉；切換結果另由常駐播報區唸出
       }, (err) => {
         if (mySeq !== geoSeq_) return;
         setBusy(false);
